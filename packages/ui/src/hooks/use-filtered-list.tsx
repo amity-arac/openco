@@ -22,24 +22,36 @@ export function useFilteredList<T>(props: FilteredListProps<T>) {
   const empty: Group[] = []
 
   const [grouped, { refetch }] = createResource(
-    () => ({
-      filter: store.filter,
-      items: typeof props.items === "function" ? props.items(store.filter) : props.items,
-    }),
-    async ({ filter, items }) => {
-      const query = filter ?? ""
-      const needle = query.toLowerCase()
-      const all = (await Promise.resolve(items)) || []
+    () => {
+      // When items is a function that takes arguments (filter function), don't call it in the source.
+      // Only call synchronous functions with no arguments to track reactive changes.
+      const isFilterFunction = typeof props.items === "function" && props.items.length > 0
+      const itemsValue =
+        typeof props.items === "function" && !isFilterFunction
+          ? (props.items as () => T[])() // Call synchronous function to track it
+          : props.items
+
+      return {
+        filter: store.filter,
+        items: isFilterFunction ? undefined : itemsValue,
+        isFilterFunction,
+      }
+    },
+    async ({ filter, items, isFilterFunction }) => {
+      const needle = filter?.toLowerCase()
+      const all: T[] = (isFilterFunction || items === undefined
+        ? await (props.items as (filter: string) => T[] | Promise<T[]>)(needle ?? "")
+        : items as T[]) || []
+      const filtered: T[] = (() => {
+        if (!needle) return all
+        if (!props.filterKeys && all.every((e) => typeof e === "string")) {
+          return fuzzysort.go(needle, all as unknown as string[]).map((x) => x.target) as T[]
+        }
+        return fuzzysort.go(needle, all, { keys: props.filterKeys! }).map((x) => x.obj as T)
+      })()
       const result = pipe(
-        all,
-        (x) => {
-          if (!needle) return x
-          if (!props.filterKeys && Array.isArray(x) && x.every((e) => typeof e === "string")) {
-            return fuzzysort.go(needle, x).map((x) => x.target) as T[]
-          }
-          return fuzzysort.go(needle, x, { keys: props.filterKeys! }).map((x) => x.obj)
-        },
-        groupBy((x) => (props.groupBy ? props.groupBy(x) : "")),
+        filtered,
+        groupBy((x: T) => (props.groupBy ? props.groupBy(x) : "")),
         entries(),
         map(([k, v]) => ({ category: k, items: props.sortBy ? v.sort(props.sortBy) : v })),
         (groups) => (props.sortGroupsBy ? groups.sort(props.sortGroupsBy) : groups),
@@ -52,7 +64,7 @@ export function useFilteredList<T>(props: FilteredListProps<T>) {
   const flat = createMemo(() => {
     return pipe(
       grouped.latest || [],
-      flatMap((x) => x.items),
+      flatMap((x: Group) => x.items),
     )
   })
 

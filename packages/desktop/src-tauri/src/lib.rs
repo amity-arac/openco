@@ -135,6 +135,25 @@ async fn set_default_server_url(app: AppHandle, url: Option<String>) -> Result<(
     Ok(())
 }
 
+#[tauri::command]
+async fn write_file(path: String, content: String) -> Result<(), String> {
+    use std::fs;
+    use std::path::Path;
+
+    let file_path = Path::new(&path);
+
+    // Create parent directories if they don't exist
+    if let Some(parent) = file_path.parent() {
+        fs::create_dir_all(parent)
+            .map_err(|e| format!("Failed to create directories: {}", e))?;
+    }
+
+    fs::write(file_path, content)
+        .map_err(|e| format!("Failed to write file: {}", e))?;
+
+    Ok(())
+}
+
 fn get_sidecar_port() -> u32 {
     option_env!("OPENCODE_PORT")
         .map(|s| s.to_string())
@@ -253,13 +272,28 @@ pub fn run() {
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_notification::init())
-        .plugin(PinchZoomDisablePlugin)
+        .plugin(PinchZoomDisablePlugin);
+
+    // MCP plugin for AI agent debugging (development only)
+    #[cfg(debug_assertions)]
+    {
+        builder = builder.plugin(
+            tauri_plugin_mcp::init_with_config(
+                tauri_plugin_mcp::PluginConfig::new("opencode-desktop".to_string())
+                    .start_socket_server(true)
+                    .socket_path("/tmp/tauri-mcp.sock".into()),
+            ),
+        );
+    }
+
+    builder = builder
         .invoke_handler(tauri::generate_handler![
             kill_sidecar,
             install_cli,
             ensure_server_ready,
             get_default_server_url,
-            set_default_server_url
+            set_default_server_url,
+            write_file
         ])
         .setup(move |app| {
             let app = app.handle().clone();
@@ -283,7 +317,8 @@ pub fn run() {
                 .find(|w| w.label == "main")
                 .expect("main window config missing");
 
-            let window_builder = WebviewWindowBuilder::from_config(&app, config)
+            #[allow(unused_mut)]
+            let mut window_builder = WebviewWindowBuilder::from_config(&app, config)
                 .expect("Failed to create window builder from config")
                 .inner_size(size.width as f64, size.height as f64)
                 .initialization_script(format!(

@@ -353,6 +353,8 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
     document.addEventListener("dragover", handleGlobalDragOver)
     document.addEventListener("dragleave", handleGlobalDragLeave)
     document.addEventListener("drop", handleGlobalDrop)
+    // Ensure root files are loaded for @ mention autocomplete
+    local.file.loadRoot()
   })
   onCleanup(() => {
     document.removeEventListener("dragover", handleGlobalDragOver)
@@ -401,7 +403,11 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
   } = useFilteredList<AtOption>({
     items: async (query) => {
       const agents = agentList()
-      const paths = await files.searchFilesAndDirectories(query)
+      // For empty query, use already-loaded root files from local store
+      // For non-empty query, use the search API
+      const paths = query
+        ? await files.searchFilesAndDirectories(query)
+        : local.file.children("").map((f) => local.file.relative(f.path))
       const fileOptions: AtOption[] = paths.map((path) => ({ type: "file", path, display: path }))
       return [...agents, ...fileOptions]
     },
@@ -1558,15 +1564,6 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
                 </div>
               </Match>
               <Match when={store.mode === "normal"}>
-                <TooltipKeybind placement="top" title="Cycle agent" keybind={command.keybind("agent.cycle")}>
-                  <Select
-                    options={local.agent.list().map((agent) => agent.name)}
-                    current={local.agent.current()?.name ?? ""}
-                    onSelect={local.agent.set}
-                    class="capitalize"
-                    variant="ghost"
-                  />
-                </TooltipKeybind>
                 <Show
                   when={providers.paid().length > 0}
                   fallback={

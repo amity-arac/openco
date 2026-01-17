@@ -1,5 +1,5 @@
 import { Tooltip as KobalteTooltip } from "@kobalte/core/tooltip"
-import { children, createSignal, Match, onMount, splitProps, Switch, type JSX } from "solid-js"
+import { children, createSignal, Match, onMount, Show, splitProps, Switch, type JSX } from "solid-js"
 import type { ComponentProps } from "solid-js"
 
 export interface TooltipProps extends ComponentProps<typeof KobalteTooltip> {
@@ -30,9 +30,21 @@ export function TooltipKeybind(props: TooltipKeybindProps) {
 
 export function Tooltip(props: TooltipProps) {
   const [open, setOpen] = createSignal(false)
-  const [local, others] = splitProps(props, ["children", "class", "inactive"])
+  // Include forceMount in local to strip it out - we never want forceMount on tooltips
+  const [local, others] = splitProps(props, ["children", "class", "inactive", "forceMount"])
 
   const c = children(() => local.children)
+
+  // Treat empty/falsy values as inactive to prevent ghost tooltips
+  const isInactive = () => {
+    if (local.inactive) return true
+    const value = others.value
+    // Check for falsy values (null, undefined, empty string, false)
+    if (!value) return true
+    // Check for empty string specifically
+    if (typeof value === "string" && value.trim() === "") return true
+    return false
+  }
 
   onMount(() => {
     const childElements = c()
@@ -51,18 +63,19 @@ export function Tooltip(props: TooltipProps) {
 
   return (
     <Switch>
-      <Match when={local.inactive}>{local.children}</Match>
+      <Match when={isInactive()}>{local.children}</Match>
       <Match when={true}>
-        <KobalteTooltip forceMount gutter={4} {...others} open={open()} onOpenChange={setOpen}>
+        <KobalteTooltip gutter={4} {...others} open={open()} onOpenChange={setOpen}>
           <KobalteTooltip.Trigger as={"div"} data-component="tooltip-trigger" class={local.class}>
             {c()}
           </KobalteTooltip.Trigger>
-          <KobalteTooltip.Portal>
-            <KobalteTooltip.Content data-component="tooltip" data-placement={props.placement}>
-              {others.value}
-              {/* <KobalteTooltip.Arrow data-slot="tooltip-arrow" /> */}
-            </KobalteTooltip.Content>
-          </KobalteTooltip.Portal>
+          <Show when={open()}>
+            <KobalteTooltip.Portal>
+              <KobalteTooltip.Content data-component="tooltip" data-placement={props.placement}>
+                {others.value}
+              </KobalteTooltip.Content>
+            </KobalteTooltip.Portal>
+          </Show>
         </KobalteTooltip>
       </Match>
     </Switch>
