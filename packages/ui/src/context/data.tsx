@@ -1,4 +1,13 @@
-import type { Message, Session, Part, FileDiff, SessionStatus, PermissionRequest } from "@opencode-ai/sdk/v2"
+import type {
+  Message,
+  Session,
+  Part,
+  FileDiff,
+  SessionStatus,
+  PermissionRequest,
+  QuestionRequest,
+  QuestionAnswer,
+} from "@opencode-ai/sdk/v2"
 import { createSimpleContext } from "./helper"
 import { PreloadMultiFileDiffResult } from "@pierre/diffs/ssr"
 
@@ -16,6 +25,9 @@ type Data = {
   permission?: {
     [sessionID: string]: PermissionRequest[]
   }
+  question?: {
+    [sessionID: string]: QuestionRequest[]
+  }
   message: {
     [sessionID: string]: Message[]
   }
@@ -30,6 +42,10 @@ export type PermissionRespondFn = (input: {
   response: "once" | "always" | "reject"
 }) => void
 
+export type QuestionReplyFn = (input: { requestID: string; answers: QuestionAnswer[] }) => void
+
+export type QuestionRejectFn = (input: { requestID: string }) => void
+
 export type NavigateToSessionFn = (sessionID: string) => void
 
 export type FileClickFn = (path: string) => void
@@ -40,6 +56,8 @@ export const { use: useData, provider: DataProvider } = createSimpleContext({
     data: Data
     directory: string
     onPermissionRespond?: PermissionRespondFn
+    onQuestionReply?: QuestionReplyFn
+    onQuestionReject?: QuestionRejectFn
     onNavigateToSession?: NavigateToSessionFn
     onFileClick?: FileClickFn
   }) => {
@@ -50,15 +68,11 @@ export const { use: useData, provider: DataProvider } = createSimpleContext({
       get directory() {
         return props.directory
       },
-      get respondToPermission() {
-        return props.onPermissionRespond
-      },
-      get navigateToSession() {
-        return props.onNavigateToSession
-      },
-      get onFileClick() {
-        return props.onFileClick
-      },
+      respondToPermission: props.onPermissionRespond,
+      replyToQuestion: props.onQuestionReply,
+      rejectQuestion: props.onQuestionReject,
+      navigateToSession: props.onNavigateToSession,
+      onFileClick: props.onFileClick,
     }
   },
 })

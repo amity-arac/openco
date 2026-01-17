@@ -33,6 +33,8 @@ import { useSync } from "@/context/sync"
 import { FileIcon } from "@opencode-ai/ui/file-icon"
 import { Button } from "@opencode-ai/ui/button"
 import { Icon } from "@opencode-ai/ui/icon"
+import { ProviderIcon } from "@opencode-ai/ui/provider-icon"
+import type { IconName } from "@opencode-ai/ui/icons/provider"
 import { Tooltip, TooltipKeybind } from "@opencode-ai/ui/tooltip"
 import { IconButton } from "@opencode-ai/ui/icon-button"
 import { Select } from "@opencode-ai/ui/select"
@@ -362,6 +364,12 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
 
   createEffect(() => {
     if (!isFocused()) setStore("popover", null)
+  })
+
+  // Safety: reset composing state on focus change to prevent stuck state
+  // This handles edge cases where compositionend event may not fire
+  createEffect(() => {
+    if (!isFocused()) setComposing(false)
   })
 
   type AtOption = { type: "agent"; name: string; display: string } | { type: "file"; path: string; display: string }
@@ -885,6 +893,14 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
       }
     }
 
+    // Handle Shift+Enter BEFORE IME check - Shift+Enter is never used for IME input
+    // and should always insert a newline regardless of composition state
+    if (event.key === "Enter" && event.shiftKey) {
+      addPart({ type: "text", content: "\n", start: 0, end: 0 })
+      event.preventDefault()
+      return
+    }
+
     if (event.key === "Enter" && isImeComposing(event)) {
       return
     }
@@ -948,11 +964,7 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
       return
     }
 
-    if (event.key === "Enter" && event.shiftKey) {
-      addPart({ type: "text", content: "\n", start: 0, end: 0 })
-      event.preventDefault()
-      return
-    }
+    // Note: Shift+Enter is handled earlier, before IME check
     if (event.key === "Enter" && !event.shiftKey) {
       handleSubmit(event)
     }
@@ -1557,6 +1569,9 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
                   fallback={
                     <TooltipKeybind placement="top" title="Choose model" keybind={command.keybind("model.choose")}>
                       <Button as="div" variant="ghost" onClick={() => dialog.show(() => <DialogSelectModelUnpaid />)}>
+                        <Show when={local.model.current()?.provider?.id}>
+                          <ProviderIcon id={local.model.current()!.provider.id as IconName} class="size-4 shrink-0" />
+                        </Show>
                         {local.model.current()?.name ?? "Select model"}
                         <Icon name="chevron-down" size="small" />
                       </Button>
@@ -1566,11 +1581,29 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
                   <ModelSelectorPopover>
                     <TooltipKeybind placement="top" title="Choose model" keybind={command.keybind("model.choose")}>
                       <Button as="div" variant="ghost">
+                        <Show when={local.model.current()?.provider?.id}>
+                          <ProviderIcon id={local.model.current()!.provider.id as IconName} class="size-4 shrink-0" />
+                        </Show>
                         {local.model.current()?.name ?? "Select model"}
                         <Icon name="chevron-down" size="small" />
                       </Button>
                     </TooltipKeybind>
                   </ModelSelectorPopover>
+                </Show>
+                <Show when={local.model.variant.list().length > 0}>
+                  <TooltipKeybind
+                    placement="top"
+                    title="Thinking effort"
+                    keybind={command.keybind("model.variant.cycle")}
+                  >
+                    <Button
+                      variant="ghost"
+                      class="text-text-base _hidden group-hover/prompt-input:inline-block capitalize text-12-regular"
+                      onClick={() => local.model.variant.cycle()}
+                    >
+                      {local.model.variant.current() ?? "Default"}
+                    </Button>
+                  </TooltipKeybind>
                 </Show>
                 <Show when={permission.permissionsEnabled() && params.id}>
                   <TooltipKeybind

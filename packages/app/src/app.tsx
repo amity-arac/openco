@@ -38,7 +38,7 @@ const Loading = () => (
 
 declare global {
   interface Window {
-    __OPENCODE__?: { updaterEnabled?: boolean }
+    __OPENCODE__?: { updaterEnabled?: boolean; serverPassword?: string }
   }
 }
 
