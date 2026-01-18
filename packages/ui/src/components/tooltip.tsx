@@ -5,6 +5,8 @@ import type { ComponentProps } from "solid-js"
 export interface TooltipProps extends ComponentProps<typeof KobalteTooltip> {
   value: JSX.Element
   class?: string
+  contentClass?: string
+  contentStyle?: JSX.CSSProperties
   inactive?: boolean
 }
 
@@ -31,7 +33,7 @@ export function TooltipKeybind(props: TooltipKeybindProps) {
 export function Tooltip(props: TooltipProps) {
   const [open, setOpen] = createSignal(false)
   // Include forceMount in local to strip it out - we never want forceMount on tooltips
-  const [local, others] = splitProps(props, ["children", "class", "inactive", "forceMount"])
+  const [local, others] = splitProps(props, ["children", "class", "contentClass", "contentStyle", "inactive", "forceMount"])
 
   const c = children(() => local.children)
 
@@ -71,7 +73,12 @@ export function Tooltip(props: TooltipProps) {
           </KobalteTooltip.Trigger>
           <Show when={open()}>
             <KobalteTooltip.Portal>
-              <KobalteTooltip.Content data-component="tooltip" data-placement={props.placement}>
+              <KobalteTooltip.Content
+                data-component="tooltip"
+                data-placement={props.placement}
+                class={local.contentClass}
+                style={local.contentStyle}
+              >
                 {others.value}
               </KobalteTooltip.Content>
             </KobalteTooltip.Portal>

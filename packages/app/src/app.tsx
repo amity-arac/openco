@@ -30,12 +30,7 @@ import { Suspense } from "solid-js"
 const Home = lazy(() => import("@/pages/home"))
 const Session = lazy(() => import("@/pages/session"))
 const ScheduledJobs = lazy(() => import("@/pages/scheduled-jobs"))
-const Loading = () => (
-  <div class="size-full flex flex-col items-center justify-center gap-4">
-    <Logo class="w-48 opacity-20 animate-pulse" />
-    <div class="text-text-weak text-sm">Loading...</div>
-  </div>
-)
+const Loading = () => <div class="size-full" />
 
 declare global {
   interface Window {
