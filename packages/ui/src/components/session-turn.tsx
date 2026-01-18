@@ -471,19 +471,19 @@ export function SessionTurn(
                           </Switch>
                         </div>
                         <div data-slot="session-turn-user-badges">
-                          <Show when={(msg() as UserMessage).agent}>
+                          {/* <Show when={(msg() as UserMessage).agent}>
                             <span data-slot="session-turn-badge">{(msg() as UserMessage).agent}</span>
-                          </Show>
+                          </Show> */}
                           <Show when={(msg() as UserMessage).model?.modelID}>
                             <span data-slot="session-turn-badge" class="inline-flex items-center gap-1">
-                              <ProviderIcon
+                              {/* <ProviderIcon
                                 id={(msg() as UserMessage).model!.providerID as IconName}
                                 class="size-3.5 shrink-0"
-                              />
+                              /> */}
                               {(msg() as UserMessage).model?.modelID}
                             </span>
                           </Show>
-                          <span data-slot="session-turn-badge">{(msg() as UserMessage).variant || "default"}</span>
+                          {/* <span data-slot="session-turn-badge">{(msg() as UserMessage).variant || "default"}</span> */}
                         </div>
                       </div>
                     </div>

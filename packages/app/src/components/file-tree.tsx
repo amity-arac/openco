@@ -34,7 +34,12 @@ export default function FileTree(props: {
       // Filter hidden files
       if (!showHidden && node.name.startsWith(".")) return false
       // Filter activity files (only for files, not directories)
-      if (hideActivityFiles && node.type === "file" && fileActivity.has(node.absolute)) return false
+      // Check both absolute path and relative path to handle different path formats
+      if (hideActivityFiles && node.type === "file") {
+        if (fileActivity.has(node.absolute) || fileActivity.has(node.path)) {
+          return false
+        }
+      }
       return true
     })
   })

@@ -10,6 +10,9 @@ Auto-generated from all feature plans. Last updated: 2026-01-14
 - TypeScript 5.8.2 (frontend), Rust 2024 Edition (Tauri backend) + Solid.js 1.9.10, @kobalte/core 0.13.11, Tailwind CSS 4.1.11, Vite 7.1.4, @tauri-apps/plugin-store (persistence), @solidjs/router (routing) (004-mcp-connectors)
 - File system (`.mcp.json` in workspace root), @tauri-apps/plugin-store for UI state persistence (004-mcp-connectors)
 - TypeScript 5.8.2 (frontend), Rust 2024 Edition (Tauri backend) + Solid.js 1.9.10, @kobalte/core 0.13.11, Tailwind CSS 4.1.11, Vite 7.1.4, @tauri-apps/api (filesystem), Zod (validation) (006-fix-mcp-api-alignment)
+- Existing layout persistence via `@tauri-apps/plugin-store` (desktop) / localStorage (web) (007-preview-fullscreen)
+- TypeScript 5.8.2 (frontend), Rust 2024 Edition (Tauri backend) + `opencode-scheduler@1.1.0`, `@opencode-ai/plugin` (peer dependency) (008-scheduler-plugin)
+- File system (`~/.config/opencode/jobs/`, `~/.config/opencode/logs/`) (008-scheduler-plugin)
 
 - TypeScript 5.8.2 / Rust 2024 Edition (Tauri backend) + Solid.js 1.9.10, Tailwind CSS 4.1.11, @kobalte/core 0.13.11, Vite 7.1.4 (001-workspace-files-sidebar)
 
@@ -29,9 +32,9 @@ cargo test [ONLY COMMANDS FOR ACTIVE TECHNOLOGIES][ONLY COMMANDS FOR ACTIVE TECH
 TypeScript 5.8.2 / Rust 2024 Edition (Tauri backend): Follow standard conventions
 
 ## Recent Changes
+- 008-scheduler-plugin: Added TypeScript 5.8.2 (frontend), Rust 2024 Edition (Tauri backend) + `opencode-scheduler@1.1.0`, `@opencode-ai/plugin` (peer dependency)
+- 007-preview-fullscreen: Added TypeScript 5.8.2 (frontend), Rust 2024 Edition (Tauri backend) + Solid.js 1.9.10, Tailwind CSS 4.1.11, @kobalte/core 0.13.11
 - 006-fix-mcp-api-alignment: Added TypeScript 5.8.2 (frontend), Rust 2024 Edition (Tauri backend) + Solid.js 1.9.10, @kobalte/core 0.13.11, Tailwind CSS 4.1.11, Vite 7.1.4, @tauri-apps/api (filesystem), Zod (validation)
-- 004-mcp-connectors: Added TypeScript 5.8.2 (frontend), Rust 2024 Edition (Tauri backend) + Solid.js 1.9.10, @kobalte/core 0.13.11, Tailwind CSS 4.1.11, Vite 7.1.4, @tauri-apps/plugin-store (persistence), @solidjs/router (routing)
-- 003-file-activity-highlight: Added TypeScript 5.8.2 (frontend), Rust 2024 Edition (Tauri backend) + Solid.js 1.9.10, Tailwind CSS 4.1.11, @kobalte/core 0.13.11, Vite 7.1.4
 
 
 <!-- MANUAL ADDITIONS START -->

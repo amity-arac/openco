@@ -29,6 +29,7 @@ import { Suspense } from "solid-js"
 
 const Home = lazy(() => import("@/pages/home"))
 const Session = lazy(() => import("@/pages/session"))
+const ScheduledJobs = lazy(() => import("@/pages/scheduled-jobs"))
 const Loading = () => (
   <div class="size-full flex flex-col items-center justify-center gap-4">
     <Logo class="w-48 opacity-20 animate-pulse" />
@@ -103,6 +104,14 @@ export function AppInterface(props: { defaultUrl?: string }) {
                 component={() => (
                   <Suspense fallback={<Loading />}>
                     <Home />
+                  </Suspense>
+                )}
+              />
+              <Route
+                path="/scheduled-jobs"
+                component={() => (
+                  <Suspense fallback={<Loading />}>
+                    <ScheduledJobs />
                   </Suspense>
                 )}
               />
