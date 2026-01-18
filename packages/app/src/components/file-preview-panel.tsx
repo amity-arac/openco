@@ -1,4 +1,5 @@
 import { Show, createSignal, createEffect, on, createMemo, onCleanup } from "solid-js"
+import { Portal } from "solid-js/web"
 import { useLayout } from "@/context/layout"
 import { useLocal, type LocalFile } from "@/context/local"
 import { useFileActivity } from "@/context/file-activity"
@@ -154,10 +155,15 @@ export function FilePreviewPanel() {
     return f?.content?.content === ""
   })
 
-  // Handle ESC key to close
+  // Handle ESC key to exit fullscreen or close panel
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === "Escape") {
-      layout.filePreview.close()
+      // Exit fullscreen first if active, otherwise close panel
+      if (layout.filePreview.fullscreen()) {
+        layout.filePreview.exitFullscreen()
+      } else {
+        layout.filePreview.close()
+      }
     }
   }
 
@@ -170,12 +176,20 @@ export function FilePreviewPanel() {
     })
   })
 
-  return (
+  // The panel content - used in both normal and fullscreen modes
+  const PanelContent = () => (
     <div
       data-component="file-preview-panel"
-      class="flex flex-col h-full flex-1 min-w-0 border-l border-border-weak-base glass-panel"
+      data-fullscreen={layout.filePreview.fullscreen() ? "true" : undefined}
+      classList={{
+        "flex flex-col h-full min-w-0": true,
+        // Normal mode styling
+        "flex-1 border-l border-border-weak-base glass-panel": !layout.filePreview.fullscreen(),
+        // Fullscreen mode styling - use fixed positioning to cover window below title bar (top-10 = 40px for titlebar)
+        "fixed top-10 left-0 right-0 bottom-0 z-[100] bg-background-base": layout.filePreview.fullscreen(),
+      }}
     >
-        {/* Header */}
+      {/* Header */}
         <div
           data-slot="preview-header"
           class="h-12 px-3 flex items-center justify-between shrink-0 border-b border-border-weak-base vibrancy"
@@ -190,13 +204,25 @@ export function FilePreviewPanel() {
               </span>
             </Show>
           </div>
-          <IconButton
-            icon="close"
-            size="normal"
-            variant="ghost"
-            onClick={() => layout.filePreview.close()}
-            aria-label="Close preview"
-          />
+          <div class="flex items-center gap-1">
+            {/* Show expand button only in normal mode */}
+            <Show when={!layout.filePreview.fullscreen()}>
+              <IconButton
+                icon="expand"
+                size="normal"
+                variant="ghost"
+                onClick={() => layout.filePreview.toggleFullscreen()}
+                aria-label="Enter fullscreen"
+              />
+            </Show>
+            <IconButton
+              icon="close"
+              size="normal"
+              variant="ghost"
+              onClick={() => layout.filePreview.close()}
+              aria-label="Close preview"
+            />
+          </div>
         </div>
 
         {/* Content */}
@@ -354,6 +380,19 @@ export function FilePreviewPanel() {
             />
           </Show>
         </div>
-      </div>
+    </div>
+  )
+
+  // Use Portal to render at document root when fullscreen, allowing it to cover entire window
+  // including sidebars. Normal mode renders inline in the session layout.
+  return (
+    <Show
+      when={layout.filePreview.fullscreen()}
+      fallback={<PanelContent />}
+    >
+      <Portal mount={document.body}>
+        <PanelContent />
+      </Portal>
+    </Show>
   )
 }

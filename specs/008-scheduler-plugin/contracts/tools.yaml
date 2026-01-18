@@ -1,0 +1,558 @@
+# Scheduler Plugin Tool Contracts
+# Feature: 008-scheduler-plugin
+# Date: 2026-01-18
+#
+# These contracts define the tool interfaces exposed by the scheduler plugin.
+# Tools follow the @opencode-ai/plugin tool() helper pattern.
+
+openapi: "3.0.3"
+info:
+  title: Scheduler Plugin Tools
+  version: "1.0.0"
+  description: |
+    Tool contracts for the built-in scheduler plugin. These tools allow
+    AI agents to create, manage, and monitor scheduled jobs.
+
+# Tool Definitions (mapped to plugin tool() calls)
+paths:
+  /tools/schedule_job:
+    post:
+      operationId: schedule_job
+      summary: Create a new scheduled job
+      description: |
+        Creates a new scheduled job that runs an AI agent task at specified intervals.
+        Maps to FR-002, FR-003.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - task
+                - schedule
+              properties:
+                name:
+                  type: string
+                  description: Human-readable job name (1-100 chars)
+                  example: "daily-security-check"
+                task:
+                  type: string
+                  description: Task description for the AI agent
+                  example: "Check for security vulnerabilities in the codebase"
+                schedule:
+                  type: string
+                  description: 5-field cron expression
+                  example: "0 9 * * *"
+                workingDirectory:
+                  type: string
+                  description: Working directory for job execution (defaults to current)
+                  example: "/Users/dev/project"
+                mcpConfig:
+                  type: object
+                  description: Optional MCP server configuration
+                attachUrl:
+                  type: string
+                  description: Optional backend URL for integration
+                json:
+                  type: boolean
+                  description: Return output in JSON format
+                  default: false
+      responses:
+        "200":
+          description: Job created successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Created job 'daily-security-check' with schedule '0 9 * * *'"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScheduledJob"
+        "400":
+          description: Invalid input (bad cron syntax, missing directory, etc.)
+
+  /tools/list_jobs:
+    post:
+      operationId: list_jobs
+      summary: List all scheduled jobs
+      description: |
+        Returns a list of all scheduled jobs with their status.
+        Maps to FR-005.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                json:
+                  type: boolean
+                  description: Return output in JSON format
+                  default: false
+                status:
+                  type: string
+                  enum: [all, enabled, disabled]
+                  description: Filter by job status
+                  default: all
+      responses:
+        "200":
+          description: List of jobs
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: |
+                  NAME                  SCHEDULE      STATUS    LAST RUN
+                  daily-security-check  0 9 * * *     enabled   2026-01-17 09:00
+                  weekly-report         0 0 * * 1     enabled   2026-01-13 00:00
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ScheduledJobSummary"
+
+  /tools/get_job:
+    post:
+      operationId: get_job
+      summary: Get detailed information about a job
+      description: |
+        Returns full configuration and recent execution history for a job.
+        Maps to FR-006.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  description: Job name or ID
+                json:
+                  type: boolean
+                  description: Return output in JSON format
+                  default: false
+      responses:
+        "200":
+          description: Job details
+          content:
+            text/plain:
+              schema:
+                type: string
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScheduledJobDetail"
+        "404":
+          description: Job not found
+
+  /tools/update_job:
+    post:
+      operationId: update_job
+      summary: Update an existing job
+      description: |
+        Modifies the schedule, task, or configuration of an existing job.
+        Maps to FR-007.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  description: Job name or ID to update
+                newName:
+                  type: string
+                  description: New name for the job
+                task:
+                  type: string
+                  description: Updated task description
+                schedule:
+                  type: string
+                  description: Updated cron expression
+                enabled:
+                  type: boolean
+                  description: Enable or disable the job
+                json:
+                  type: boolean
+                  description: Return output in JSON format
+                  default: false
+      responses:
+        "200":
+          description: Job updated successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScheduledJob"
+        "404":
+          description: Job not found
+        "400":
+          description: Invalid update parameters
+
+  /tools/delete_job:
+    post:
+      operationId: delete_job
+      summary: Delete a scheduled job
+      description: |
+        Removes a job and cleans up OS scheduler entries.
+        Maps to FR-008.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  description: Job name or ID to delete
+                force:
+                  type: boolean
+                  description: Delete even if job is currently running
+                  default: false
+                json:
+                  type: boolean
+                  description: Return output in JSON format
+                  default: false
+      responses:
+        "200":
+          description: Job deleted successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Deleted job 'daily-security-check'"
+        "404":
+          description: Job not found
+        "409":
+          description: Job is currently running (use force=true to override)
+
+  /tools/job_logs:
+    post:
+      operationId: job_logs
+      summary: View execution logs for a job
+      description: |
+        Returns execution history and log output for a job.
+        Maps to FR-009.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  description: Job name or ID
+                limit:
+                  type: integer
+                  description: Number of log entries to return
+                  default: 10
+                  maximum: 100
+                execution:
+                  type: string
+                  description: Specific execution ID to view
+                json:
+                  type: boolean
+                  description: Return output in JSON format
+                  default: false
+      responses:
+        "200":
+          description: Log entries
+          content:
+            text/plain:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ExecutionLogEntry"
+        "404":
+          description: Job or execution not found
+
+  /tools/run_job:
+    post:
+      operationId: run_job
+      summary: Run a job immediately
+      description: |
+        Triggers immediate execution of a scheduled job.
+        Maps to FR-010.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  description: Job name or ID to run
+                json:
+                  type: boolean
+                  description: Return output in JSON format
+                  default: false
+      responses:
+        "200":
+          description: Job started
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Started job 'daily-security-check' (execution: abc123)"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobExecution"
+        "404":
+          description: Job not found
+        "409":
+          description: Job is already running
+
+  /tools/get_skill:
+    post:
+      operationId: get_skill
+      summary: Get available skill templates
+      description: |
+        Returns list of pre-built job templates.
+        Maps to P3 user story.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                category:
+                  type: string
+                  description: Filter by category
+                json:
+                  type: boolean
+                  description: Return output in JSON format
+                  default: false
+      responses:
+        "200":
+          description: List of skills
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SkillTemplate"
+
+  /tools/install_skill:
+    post:
+      operationId: install_skill
+      summary: Create a job from a skill template
+      description: |
+        Creates a new job using a pre-configured skill template.
+        Maps to P3 user story.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - skill
+                - name
+              properties:
+                skill:
+                  type: string
+                  description: Skill template ID
+                name:
+                  type: string
+                  description: Name for the new job
+                schedule:
+                  type: string
+                  description: Override default schedule
+                json:
+                  type: boolean
+                  description: Return output in JSON format
+                  default: false
+      responses:
+        "200":
+          description: Job created from skill
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScheduledJob"
+        "404":
+          description: Skill not found
+
+  /tools/get_version:
+    post:
+      operationId: get_version
+      summary: Get scheduler plugin version
+      description: Returns version information for debugging.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                json:
+                  type: boolean
+                  default: false
+      responses:
+        "200":
+          description: Version info
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "opencode-scheduler v1.1.0"
+
+components:
+  schemas:
+    ScheduledJob:
+      type: object
+      required:
+        - id
+        - name
+        - description
+        - schedule
+        - workingDirectory
+        - enabled
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        schedule:
+          type: string
+        workingDirectory:
+          type: string
+        enabled:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        lastRunAt:
+          type: string
+          format: date-time
+        nextRunAt:
+          type: string
+          format: date-time
+        mcpConfig:
+          type: object
+        attachUrl:
+          type: string
+
+    ScheduledJobSummary:
+      type: object
+      properties:
+        name:
+          type: string
+        schedule:
+          type: string
+        enabled:
+          type: boolean
+        lastRunAt:
+          type: string
+          format: date-time
+        nextRunAt:
+          type: string
+          format: date-time
+        lastStatus:
+          type: string
+          enum: [success, failure, running, never]
+
+    ScheduledJobDetail:
+      allOf:
+        - $ref: "#/components/schemas/ScheduledJob"
+        - type: object
+          properties:
+            recentExecutions:
+              type: array
+              items:
+                $ref: "#/components/schemas/JobExecution"
+
+    JobExecution:
+      type: object
+      required:
+        - id
+        - jobId
+        - startedAt
+        - status
+        - triggeredBy
+      properties:
+        id:
+          type: string
+        jobId:
+          type: string
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [pending, running, success, failure]
+        exitCode:
+          type: integer
+        logFile:
+          type: string
+        triggeredBy:
+          type: string
+          enum: [schedule, manual, catchup]
+        duration:
+          type: integer
+          description: Duration in milliseconds
+
+    ExecutionLogEntry:
+      type: object
+      properties:
+        executionId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: string
+        output:
+          type: string
+        error:
+          type: string
+
+    SkillTemplate:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        defaultSchedule:
+          type: string
+        taskTemplate:
+          type: string
+        requiredMcp:
+          type: array
+          items:
+            type: string

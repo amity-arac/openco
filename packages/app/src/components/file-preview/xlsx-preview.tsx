@@ -31,6 +31,7 @@ export function XlsxPreview(props: XlsxPreviewProps) {
 
           // Parse the workbook
           const wb = XLSX.read(bytes, { type: "array" })
+          console.log("[XlsxPreview] Workbook sheets:", wb.SheetNames)
           setWorkbook(wb)
 
           // Set first sheet as active
@@ -63,12 +64,18 @@ export function XlsxPreview(props: XlsxPreviewProps) {
     const sheet = wb.Sheets[sheetName]
     if (!sheet) return []
 
+    // Debug: log sheet range
+    console.log("[XlsxPreview] Sheet ref:", sheet["!ref"])
+
     // Convert sheet to JSON array of arrays
     const data = XLSX.utils.sheet_to_json<string[]>(sheet, {
       header: 1,
       defval: "",
       blankrows: false,
     })
+
+    // Debug: log actual data dimensions
+    console.log("[XlsxPreview] Data rows:", data.length, "Max cols:", Math.max(...data.map((r) => r.length), 0))
 
     // Limit rows for performance
     const maxRows = 1000

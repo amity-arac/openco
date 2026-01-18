@@ -15,7 +15,7 @@ import {
   type Accessor,
   type JSX,
 } from "solid-js"
-import { A, useNavigate, useParams } from "@solidjs/router"
+import { A, useNavigate, useParams, useLocation } from "@solidjs/router"
 import { useLayout, getAvatarColors, LocalProject } from "@/context/layout"
 import { useGlobalSync } from "@/context/global-sync"
 import { Persist, persisted } from "@/utils/persist"
@@ -64,6 +64,7 @@ import { DialogSelectDirectory } from "@/components/dialog-select-directory"
 import { DialogEditProject } from "@/components/dialog-edit-project"
 import { Titlebar } from "@/components/titlebar"
 import { useServer } from "@/context/server"
+import { ScheduledJobsProvider } from "@/context/scheduled-jobs"
 
 export default function Layout(props: ParentProps) {
   const [store, setStore, , ready] = persisted(
@@ -88,6 +89,7 @@ export default function Layout(props: ParentProps) {
   onCleanup(() => xlQuery.removeEventListener("change", handleViewportChange))
 
   const params = useParams()
+  const location = useLocation()
   const [autoselect, setAutoselect] = createSignal(!params.dir)
   const globalSDK = useGlobalSDK()
   const globalSync = useGlobalSync()
@@ -102,6 +104,7 @@ export default function Layout(props: ParentProps) {
   const dialog = useDialog()
   const command = useCommand()
   const theme = useTheme()
+  const isScheduledJobsRoute = createMemo(() => location.pathname === "/scheduled-jobs")
   const initialDir = params.dir
   const availableThemeEntries = createMemo(() => Object.entries(theme.themes()))
   const colorSchemeOrder: ColorScheme[] = ["system", "light", "dark"]
@@ -1332,6 +1335,8 @@ export default function Layout(props: ParentProps) {
   const SortableProject = (props: { project: LocalProject; mobile?: boolean }): JSX.Element => {
     const sortable = createSortable(props.project.worktree)
     const selected = createMemo(() => {
+      // Don't show project as selected when on scheduled jobs route
+      if (isScheduledJobsRoute()) return false
       const current = params.dir ? base64Decode(params.dir) : ""
       return props.project.worktree === current || props.project.sandboxes?.includes(current)
     })
@@ -1573,6 +1578,20 @@ export default function Layout(props: ParentProps) {
             </DragDropProvider>
           </div>
           <div class="shrink-0 w-full pt-3 pb-3 flex flex-col items-center gap-2">
+            <Tooltip placement={sidebarProps.mobile ? "bottom" : "right"} value="Scheduled Jobs">
+              <button
+                type="button"
+                classList={{
+                  "flex items-center justify-center size-10 p-1 rounded-lg overflow-hidden transition-colors cursor-default": true,
+                  "bg-transparent border-2 border-icon-strong-base hover:bg-surface-base-hover": isScheduledJobsRoute(),
+                  "bg-transparent border border-transparent hover:bg-surface-base-hover hover:border-border-weak-base": !isScheduledJobsRoute(),
+                }}
+                onClick={() => navigate("/scheduled-jobs")}
+                aria-label="Scheduled jobs"
+              >
+                <Icon name="checklist" size="large" />
+              </button>
+            </Tooltip>
             <Tooltip placement={sidebarProps.mobile ? "bottom" : "right"} value="Settings">
               <IconButton disabled icon="settings-gear" variant="ghost" size="large" />
             </Tooltip>
@@ -1595,7 +1614,26 @@ export default function Layout(props: ParentProps) {
             }}
             style={{ width: sidebarProps.mobile ? undefined : `${Math.max(layout.sidebar.width() - 64, 0)}px` }}
           >
-            <Show when={project()} keyed>
+            {/* Scheduled Jobs sidebar content */}
+            <Show when={isScheduledJobsRoute()}>
+              <div class="shrink-0 px-2 py-1">
+                <div class="flex items-start justify-between gap-2 p-2 pr-1">
+                  <div class="flex flex-col min-w-0">
+                    <span class="text-16-medium text-text-strong truncate">Scheduled Jobs</span>
+                    <span class="text-12-regular text-text-muted truncate">
+                      Global scheduled tasks
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex-1 min-h-0 flex flex-col items-center justify-center px-4 text-center">
+                <div class="text-12-regular text-text-muted max-w-[200px]">
+                  Manage scheduled AI tasks that run automatically across all projects.
+                </div>
+              </div>
+            </Show>
+            {/* Project sidebar content */}
+            <Show when={!isScheduledJobsRoute() && project()} keyed>
               {(p) => (
                 <>
                   <div class="shrink-0 px-2 py-1">
@@ -1629,11 +1667,11 @@ export default function Layout(props: ParentProps) {
                             <DropdownMenu.Item onSelect={() => dialog.show(() => <DialogEditProject project={p} />)}>
                               <DropdownMenu.ItemLabel>Edit</DropdownMenu.ItemLabel>
                             </DropdownMenu.Item>
-                            <DropdownMenu.Item onSelect={() => layout.sidebar.toggleWorkspaces(p.worktree)}>
+                            {/* <DropdownMenu.Item onSelect={() => layout.sidebar.toggleWorkspaces(p.worktree)}>
                               <DropdownMenu.ItemLabel>
                                 {layout.sidebar.workspaces(p.worktree)() ? "Disable workspaces" : "Enable workspaces"}
                               </DropdownMenu.ItemLabel>
-                            </DropdownMenu.Item>
+                            </DropdownMenu.Item> */}
                             <DropdownMenu.Separator />
                             <DropdownMenu.Item onSelect={() => closeProject(p.worktree)}>
                               <DropdownMenu.ItemLabel>Close</DropdownMenu.ItemLabel>
@@ -1733,6 +1771,7 @@ export default function Layout(props: ParentProps) {
   }
 
   return (
+    <ScheduledJobsProvider>
     <div class="relative bg-background-base flex-1 min-h-0 flex flex-col select-none [&_input]:select-text [&_textarea]:select-text [&_[contenteditable]]:select-text">
       <Titlebar />
       <div class="flex-1 min-h-0 flex">
@@ -1792,5 +1831,6 @@ export default function Layout(props: ParentProps) {
       </div>
       <Toast.Region />
     </div>
+    </ScheduledJobsProvider>
   )
 }

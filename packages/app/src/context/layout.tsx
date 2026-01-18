@@ -1,5 +1,5 @@
 import { createStore, produce } from "solid-js/store"
-import { batch, createEffect, createMemo, onCleanup, onMount } from "solid-js"
+import { batch, createEffect, createMemo, createSignal, onCleanup, onMount } from "solid-js"
 import { createSimpleContext } from "@opencode-ai/ui/context"
 import { useGlobalSync } from "./global-sync"
 import { useGlobalSDK } from "./global-sdk"
@@ -65,6 +65,9 @@ export const { use: useLayout, provider: LayoutProvider } = createSimpleContext(
         },
       }
     }
+
+    // Non-persisted fullscreen state for file preview (transient UI state)
+    const [previewFullscreen, setPreviewFullscreen] = createSignal(false)
 
     const target = Persist.global("layout", ["layout.v8"])
     const [store, setStore, _, ready] = persisted(
@@ -425,6 +428,7 @@ export const { use: useLayout, provider: LayoutProvider } = createSimpleContext(
         opened: createMemo(() => store.filePreview?.opened ?? false),
         filePath: createMemo(() => store.filePreview?.filePath ?? null),
         width: createMemo(() => store.filePreview?.width ?? 400),
+        fullscreen: previewFullscreen,
         open(filePath: string) {
           console.log("[layout.filePreview] Opening preview with path:", filePath)
           if (!store.filePreview) {
@@ -435,6 +439,8 @@ export const { use: useLayout, provider: LayoutProvider } = createSimpleContext(
           setStore("filePreview", "filePath", filePath)
         },
         close() {
+          // Exit fullscreen before closing
+          setPreviewFullscreen(false)
           if (!store.filePreview) {
             setStore("filePreview", { opened: false, width: 400, filePath: null })
             return
@@ -449,6 +455,19 @@ export const { use: useLayout, provider: LayoutProvider } = createSimpleContext(
             return
           }
           setStore("filePreview", "width", clampedWidth)
+        },
+        enterFullscreen() {
+          if (!store.filePreview?.opened) return
+          setPreviewFullscreen(true)
+        },
+        exitFullscreen() {
+          setPreviewFullscreen(false)
+        },
+        toggleFullscreen() {
+          console.log("[layout.filePreview.toggleFullscreen] Called, opened:", store.filePreview?.opened, "current fullscreen:", previewFullscreen())
+          if (!store.filePreview?.opened) return
+          setPreviewFullscreen((prev) => !prev)
+          console.log("[layout.filePreview.toggleFullscreen] New fullscreen state:", !previewFullscreen())
         },
       },
       connectors: {

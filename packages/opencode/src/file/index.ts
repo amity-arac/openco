@@ -99,6 +99,9 @@ export namespace File {
       "msword",
       "powerpoint",
       "excel",
+      "spreadsheetml", // .xlsx files: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      "wordprocessingml", // .docx files: application/vnd.openxmlformats-officedocument.wordprocessingml.document
+      "presentationml", // .pptx files: application/vnd.openxmlformats-officedocument.presentationml.presentation
       "ogg",
       "exe",
       "dmg",

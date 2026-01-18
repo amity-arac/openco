@@ -287,12 +287,21 @@ export const { use: useFileActivity, provider: FileActivityProvider } = createSi
       const files = currentSession().store.files
       // Try exact match first
       if (path in files) return path
-      // Try normalized (relative) version
+      // Try normalized (relative) version of input
       const normalized = normalizePath(path)
       if (normalized !== path && normalized in files) return normalized
-      // Try absolute version (if input was relative)
+      // Try absolute version of input (if input was relative)
       const absolute = toAbsolutePath(path)
       if (absolute !== path && absolute in files) return absolute
+      // Also check if any stored path matches when normalized
+      // This handles cases where stored paths are in different formats
+      for (const storedPath of Object.keys(files)) {
+        const storedNormalized = normalizePath(storedPath)
+        const storedAbsolute = toAbsolutePath(storedPath)
+        if (storedNormalized === normalized || storedAbsolute === absolute) {
+          return storedPath
+        }
+      }
       return undefined
     }
 
