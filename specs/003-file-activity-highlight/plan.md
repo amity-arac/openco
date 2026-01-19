@@ -28,7 +28,7 @@ The constitution file is a template without project-specific principles defined.
 - ✅ Uses existing Solid.js store pattern from `local.tsx`
 - ✅ Follows established event emitter pattern from `sdk.tsx`
 - ✅ Extends existing component patterns (file-tree.tsx styling)
-- ✅ Uses existing theme colors (openwork.json)
+- ✅ Uses existing theme colors (openco.json)
 - ✅ No new external dependencies required
 
 ## Project Structure
@@ -65,7 +65,7 @@ packages/ui/src/
 ├── components/
 │   └── badge.tsx                  # New: Generic badge component (if needed)
 └── theme/
-    └── themes/openwork.json       # Reference: existing colors
+    └── themes/openco.json       # Reference: existing colors
 ```
 
 **Structure Decision**: Extends existing monorepo structure. New activity tracking is added as a separate context to maintain separation of concerns while integrating with the existing `local.tsx` file state.

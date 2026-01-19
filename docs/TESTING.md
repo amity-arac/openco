@@ -2,7 +2,7 @@
 
 **Last Updated:** 2026-01-15
 
-This document covers testing patterns, strategies, and setup for the OpenWork codebase.
+This document covers testing patterns, strategies, and setup for the OpenCo codebase.
 
 ## Table of Contents
 
@@ -20,7 +20,7 @@ This document covers testing patterns, strategies, and setup for the OpenWork co
 
 ### Current Testing Status
 
-The OpenWork codebase uses **Bun's built-in test runner** for TypeScript/JavaScript tests and **Cargo** for Rust tests.
+The OpenCo codebase uses **Bun's built-in test runner** for TypeScript/JavaScript tests and **Cargo** for Rust tests.
 
 | Package | Has Tests | Test Framework |
 |---------|-----------|----------------|
@@ -44,7 +44,7 @@ The OpenWork codebase uses **Bun's built-in test runner** for TypeScript/JavaScr
 
 ### Bun Test
 
-OpenWork uses Bun's built-in test runner which is Jest-compatible:
+OpenCo uses Bun's built-in test runner which is Jest-compatible:
 
 ```bash
 # Run all tests in a package
@@ -287,7 +287,7 @@ describe("Reactive Effects", () => {
 cargo test
 
 # Run tests for specific package
-cargo test -p openwork-desktop
+cargo test -p openco-desktop
 
 # Run with output
 cargo test -- --nocapture

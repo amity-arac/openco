@@ -1,6 +1,6 @@
-# OpenWork Agent Guide
+# OpenCo Agent Guide
 
-This guide helps AI agents get started working on the OpenWork codebase effectively.
+This guide helps AI agents get started working on the OpenCo codebase effectively.
 
 ## Getting Started
 

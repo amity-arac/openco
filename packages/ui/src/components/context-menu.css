@@ -1,0 +1,111 @@
+/* Remove focus outline from context menu trigger */
+[data-slot="context-menu-trigger"] {
+  outline: none;
+}
+
+[data-component="context-menu-content"] {
+  min-width: 8rem;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in oklch, var(--border-base) 50%, transparent);
+  background-clip: padding-box;
+  background-color: var(--surface-raised-stronger-non-alpha);
+  padding: 4px;
+  box-shadow: var(--shadow-md);
+  z-index: 50;
+  transform-origin: var(--kb-menu-content-transform-origin);
+
+  &[data-closed] {
+    animation: context-menu-close 0.15s ease-out;
+  }
+
+  &[data-expanded] {
+    animation: context-menu-open 0.15s ease-out;
+  }
+}
+
+[data-component="context-menu-content"] {
+  [data-slot="context-menu-item"] {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    cursor: default;
+    user-select: none;
+    outline: none;
+
+    font-family: var(--font-family-sans);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-large);
+    letter-spacing: var(--letter-spacing-normal);
+    color: var(--text-strong);
+
+    &[data-highlighted] {
+      background: var(--surface-raised-base-hover);
+    }
+
+    &[data-disabled] {
+      color: var(--text-weak);
+      pointer-events: none;
+    }
+
+    &[data-destructive="true"] {
+      color: var(--text-error-base);
+
+      &[data-highlighted] {
+        background: var(--surface-error-base);
+        color: var(--text-error-strong);
+      }
+    }
+  }
+
+  [data-slot="context-menu-item-label"] {
+    flex: 1;
+  }
+
+  [data-slot="context-menu-item-description"] {
+    font-size: var(--font-size-x-small);
+    color: var(--text-weak);
+  }
+
+  [data-slot="context-menu-separator"] {
+    height: 1px;
+    margin: 4px -4px;
+    border-top-color: var(--border-weak-base);
+  }
+
+  [data-slot="context-menu-group-label"] {
+    padding: 4px 8px;
+    font-family: var(--font-family-sans);
+    font-size: var(--font-size-x-small);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-large);
+    letter-spacing: var(--letter-spacing-normal);
+    color: var(--text-weak);
+  }
+}
+
+@keyframes context-menu-open {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes context-menu-close {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}

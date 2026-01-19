@@ -2,7 +2,7 @@
 
 **Last Updated:** 2026-01-15
 
-This document details the Solid.js component and context patterns used in the OpenWork codebase.
+This document details the Solid.js component and context patterns used in the OpenCo codebase.
 
 ## Table of Contents
 

@@ -1,8 +1,8 @@
-# OpenWork Architecture Documentation
+# OpenCo Architecture Documentation
 
 **Last Updated:** 2026-01-15
 
-This document provides a comprehensive overview of the OpenWork codebase architecture for developers joining the project.
+This document provides a comprehensive overview of the OpenCo codebase architecture for developers joining the project.
 
 ## Table of Contents
 
@@ -18,7 +18,7 @@ This document provides a comprehensive overview of the OpenWork codebase archite
 
 ## Project Overview
 
-**OpenWork** is an AI-powered workspace collaboration tool for knowledge workers. It's a fork of OpenCode with extended capabilities for multi-file collaboration, file activity tracking, and team workflows. The project provides:
+**OpenCo** is an AI-powered workspace collaboration tool for knowledge workers. It's a fork of OpenCode with extended capabilities for multi-file collaboration, file activity tracking, and team workflows. The project provides:
 
 - **Desktop Application**: Native app built with Tauri (Rust backend + Solid.js frontend)
 - **Web Application**: Browser-based interface using Solid.js
@@ -48,7 +48,7 @@ This document provides a comprehensive overview of the OpenWork codebase archite
 ## Repository Structure
 
 ```
-openwork/
+openco/
 ├── packages/                    # Monorepo packages
 │   ├── app/                     # Main web application UI
 │   ├── desktop/                 # Tauri desktop application

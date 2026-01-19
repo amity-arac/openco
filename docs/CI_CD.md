@@ -2,7 +2,7 @@
 
 **Last Updated:** 2026-01-15
 
-This document covers the continuous integration and deployment pipelines for OpenWork.
+This document covers the continuous integration and deployment pipelines for OpenCo.
 
 ## Table of Contents
 
@@ -17,7 +17,7 @@ This document covers the continuous integration and deployment pipelines for Ope
 
 ## Overview
 
-OpenWork uses **GitHub Actions** for CI/CD with 21 workflows handling:
+OpenCo uses **GitHub Actions** for CI/CD with 21 workflows handling:
 
 - Testing and type checking
 - Multi-platform desktop builds (macOS, Windows, Linux)

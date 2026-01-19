@@ -700,7 +700,7 @@ pub fn process_image(
 
 ```toml
 [package]
-name = "openwork-desktop"
+name = "openco-desktop"
 version = "0.1.0"
 edition = "2024"
 
@@ -733,9 +733,9 @@ opt-level = 0
 
 ```json
 {
-  "productName": "OpenWork",
+  "productName": "OpenCo",
   "version": "0.1.0",
-  "identifier": "ai.openwork.desktop",
+  "identifier": "ai.openco.desktop",
   "build": {
     "beforeDevCommand": "bun run dev",
     "beforeBuildCommand": "bun run build",
@@ -745,7 +745,7 @@ opt-level = 0
   "app": {
     "windows": [
       {
-        "title": "OpenWork",
+        "title": "OpenCo",
         "width": 1200,
         "height": 800,
         "minWidth": 800,

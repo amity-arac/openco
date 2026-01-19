@@ -2,7 +2,7 @@
 
 **Last Updated:** 2026-01-15
 
-This document covers the SDK architecture, API patterns, and integration approaches used in OpenWork.
+This document covers the SDK architecture, API patterns, and integration approaches used in OpenCo.
 
 ## Table of Contents
 
@@ -372,7 +372,7 @@ const transport = new StdioClientTransport({
 })
 
 // Initialize client
-const client = new Client({ name: "openwork", version: "1.0.0" })
+const client = new Client({ name: "openco", version: "1.0.0" })
 await client.connect(transport)
 ```
 

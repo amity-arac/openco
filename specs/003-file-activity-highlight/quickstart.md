@@ -199,4 +199,4 @@ Wrap FileTree with provider in `workspace-sidebar.tsx`:
 
 - `packages/app/src/context/local.tsx` - Store pattern reference
 - `packages/app/src/components/session-lsp-indicator.tsx` - Indicator pattern
-- `packages/ui/src/theme/themes/openwork.json` - Color tokens
+- `packages/ui/src/theme/themes/openco.json` - Color tokens

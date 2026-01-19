@@ -154,6 +154,85 @@ async fn write_file(path: String, content: String) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+async fn create_directory(path: String) -> Result<(), String> {
+    use std::fs;
+    use std::path::Path;
+
+    let dir_path = Path::new(&path);
+
+    fs::create_dir_all(dir_path)
+        .map_err(|e| format!("Failed to create directory: {}", e))?;
+
+    Ok(())
+}
+
+#[tauri::command]
+async fn copy_file(source: String, destination: String) -> Result<(), String> {
+    use std::fs;
+    use std::path::Path;
+
+    let dest_path = Path::new(&destination);
+
+    // Create parent directories if they don't exist
+    if let Some(parent) = dest_path.parent() {
+        fs::create_dir_all(parent)
+            .map_err(|e| format!("Failed to create directories: {}", e))?;
+    }
+
+    fs::copy(&source, &destination)
+        .map_err(|e| format!("Failed to copy file: {}", e))?;
+
+    Ok(())
+}
+
+#[tauri::command]
+async fn rename_path(source: String, destination: String) -> Result<(), String> {
+    use std::fs;
+
+    fs::rename(&source, &destination)
+        .map_err(|e| format!("Failed to rename: {}", e))?;
+
+    Ok(())
+}
+
+#[tauri::command]
+async fn delete_path(path: String) -> Result<(), String> {
+    use std::fs;
+    use std::path::Path;
+
+    let file_path = Path::new(&path);
+
+    if file_path.is_dir() {
+        fs::remove_dir_all(file_path)
+            .map_err(|e| format!("Failed to delete directory: {}", e))?;
+    } else {
+        fs::remove_file(file_path)
+            .map_err(|e| format!("Failed to delete file: {}", e))?;
+    }
+
+    Ok(())
+}
+
+#[tauri::command]
+async fn move_path(source: String, destination: String) -> Result<(), String> {
+    use std::fs;
+    use std::path::Path;
+
+    let dest_path = Path::new(&destination);
+
+    // Create parent directories if they don't exist
+    if let Some(parent) = dest_path.parent() {
+        fs::create_dir_all(parent)
+            .map_err(|e| format!("Failed to create directories: {}", e))?;
+    }
+
+    fs::rename(&source, &destination)
+        .map_err(|e| format!("Failed to move: {}", e))?;
+
+    Ok(())
+}
+
 fn get_sidecar_port() -> u32 {
     option_env!("OPENCODE_PORT")
         .map(|s| s.to_string())
@@ -293,7 +372,12 @@ pub fn run() {
             ensure_server_ready,
             get_default_server_url,
             set_default_server_url,
-            write_file
+            write_file,
+            create_directory,
+            copy_file,
+            rename_path,
+            delete_path,
+            move_path
         ])
         .setup(move |app| {
             let app = app.handle().clone();

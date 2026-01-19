@@ -452,9 +452,8 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
       const fetch = async (path: string) => {
         const relativePath = relative(path)
         const parent = relativePath.split("/").slice(0, -1).join("/")
-        if (parent) {
-          await list(parent)
-        }
+        // List parent directory to create the node entry, or root if file is at top level
+        await list(parent)
       }
 
       const init = async (path: string) => {
@@ -485,20 +484,37 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
       }
 
       const list = async (path: string) => {
+        console.log("[local.file.list] Listing directory:", path)
         return sdk.client.file
           .list({ path: path + "/" })
           .then((x) => {
+            console.log("[local.file.list] Got", x.data?.length ?? 0, "nodes for:", path)
             setStore(
               "node",
               produce((draft) => {
+                const prefix = path ? path + "/" : ""
+
+                // Remove all direct children of this directory
+                for (const existingPath of Object.keys(draft)) {
+                  if (existingPath.startsWith(prefix) && existingPath !== path) {
+                    const relativePart = existingPath.slice(prefix.length)
+                    // Only remove direct children (no nested slashes)
+                    if (!relativePart.includes("/")) {
+                      delete draft[existingPath]
+                    }
+                  }
+                }
+
+                // Add all nodes from the fresh listing
                 x.data!.forEach((node) => {
-                  if (node.path in draft) return
                   draft[node.path] = node
                 })
               }),
             )
           })
-          .catch(() => {})
+          .catch((e) => {
+            console.error("[local.file.list] Error listing directory:", path, e)
+          })
       }
 
       const searchFiles = (query: string) => sdk.client.find.files({ query, dirs: "false" }).then((x) => x.data!)
@@ -542,7 +558,23 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
         },
         // Refresh a directory listing (force re-fetch from server)
         refreshDir(path: string) {
-          list(path)
+          return list(path)
+        },
+        // Remove a node from the store (after deletion)
+        remove(path: string) {
+          setStore(
+            "node",
+            produce((draft) => {
+              // Remove the node itself
+              delete draft[path]
+              // Also remove any children if it's a directory
+              for (const key of Object.keys(draft)) {
+                if (key.startsWith(path + "/")) {
+                  delete draft[key]
+                }
+              }
+            }),
+          )
         },
         expand(path: string) {
           setStore("node", path, "expanded", true)
@@ -595,6 +627,10 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
               x.path !== path &&
               !x.path.replace(new RegExp(`^${path + "/"}`), "").includes("/"),
           )
+        },
+        // Get all known file paths in the store
+        getAllPaths() {
+          return Object.keys(store.node)
         },
         searchFiles,
         searchFilesAndDirectories,

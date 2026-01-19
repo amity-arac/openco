@@ -51,6 +51,7 @@
     "luxon": "catalog:",
     "marked": "catalog:",
     "marked-shiki": "catalog:",
+    "pdfjs-dist": "5.2.133",
     "remeda": "catalog:",
     "shiki": "catalog:",
     "solid-js": "catalog:",

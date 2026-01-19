@@ -172,140 +172,36 @@ export function SessionHeader() {
               {/*   <SessionMcpIndicator /> */}
               {/* </div> */}
               <div class="flex items-center gap-1">
-                <Show when={currentSession()?.summary?.files}>
-                  <TooltipKeybind
-                    class="hidden md:block shrink-0"
-                    title="Toggle review"
-                    keybind={command.keybind("review.toggle")}
-                  >
-                    <Button
-                      variant="ghost"
-                      class="group/review-toggle size-6 p-0"
-                      onClick={() => view().reviewPanel.toggle()}
-                    >
-                      <div class="relative flex items-center justify-center size-4 [&>*]:absolute [&>*]:inset-0">
-                        <Icon
-                          name={view().reviewPanel.opened() ? "layout-right" : "layout-left"}
-                          size="small"
-                          class="group-hover/review-toggle:hidden"
-                        />
-                        <Icon
-                          name={view().reviewPanel.opened() ? "layout-right-partial" : "layout-left-partial"}
-                          size="small"
-                          class="hidden group-hover/review-toggle:inline-block"
-                        />
-                        <Icon
-                          name={view().reviewPanel.opened() ? "layout-right-full" : "layout-left-full"}
-                          size="small"
-                          class="hidden group-active/review-toggle:inline-block"
-                        />
-                      </div>
-                    </Button>
-                  </TooltipKeybind>
-                </Show>
                 <TooltipKeybind
                   class="hidden md:block shrink-0"
-                  title="Toggle terminal"
-                  keybind={command.keybind("terminal.toggle")}
+                  title="Toggle file explorer"
+                  keybind={command.keybind("files.toggle")}
                 >
                   <Button
                     variant="ghost"
-                    class="group/terminal-toggle size-6 p-0"
-                    onClick={() => view().terminal.toggle()}
+                    class="group/files-toggle size-6 p-0"
+                    onClick={() => layout.workspaceSidebar.toggle()}
                   >
                     <div class="relative flex items-center justify-center size-4 [&>*]:absolute [&>*]:inset-0">
                       <Icon
+                        name={layout.workspaceSidebar.opened() ? "layout-right" : "layout-left"}
                         size="small"
-                        name={view().terminal.opened() ? "layout-bottom-full" : "layout-bottom"}
-                        class="group-hover/terminal-toggle:hidden"
+                        class="group-hover/files-toggle:hidden"
                       />
                       <Icon
+                        name={layout.workspaceSidebar.opened() ? "layout-right-partial" : "layout-left-partial"}
                         size="small"
-                        name="layout-bottom-partial"
-                        class="hidden group-hover/terminal-toggle:inline-block"
+                        class="hidden group-hover/files-toggle:inline-block"
                       />
                       <Icon
+                        name={layout.workspaceSidebar.opened() ? "layout-right-full" : "layout-left-full"}
                         size="small"
-                        name={view().terminal.opened() ? "layout-bottom" : "layout-bottom-full"}
-                        class="hidden group-active/terminal-toggle:inline-block"
+                        class="hidden group-active/files-toggle:inline-block"
                       />
                     </div>
                   </Button>
                 </TooltipKeybind>
               </div>
-              <Show when={shareEnabled() && currentSession()}>
-                <div class="flex items-center">
-                  <Popover
-                    title="Publish on web"
-                    description={
-                      shareUrl()
-                        ? "This session is public on the web. It is accessible to anyone with the link."
-                        : "Share session publicly on the web. It will be accessible to anyone with the link."
-                    }
-                    trigger={
-                      <Tooltip class="shrink-0" value="Share session">
-                        <Button variant="secondary" classList={{ "rounded-r-none": shareUrl() !== undefined }}>
-                          Share
-                        </Button>
-                      </Tooltip>
-                    }
-                  >
-                    <div class="flex flex-col gap-2">
-                      <Show
-                        when={shareUrl()}
-                        fallback={
-                          <div class="flex">
-                            <Button
-                              size="large"
-                              variant="primary"
-                              class="w-1/2"
-                              onClick={shareSession}
-                              disabled={state.share}
-                            >
-                              {state.share ? "Publishing..." : "Publish"}
-                            </Button>
-                          </div>
-                        }
-                      >
-                        <div class="flex flex-col gap-2 w-72">
-                          <TextField value={shareUrl() ?? ""} readOnly copyable class="w-full" />
-                          <div class="grid grid-cols-2 gap-2">
-                            <Button
-                              size="large"
-                              variant="secondary"
-                              class="w-full shadow-none border border-border-weak-base"
-                              onClick={unshareSession}
-                              disabled={state.unshare}
-                            >
-                              {state.unshare ? "Unpublishing..." : "Unpublish"}
-                            </Button>
-                            <Button
-                              size="large"
-                              variant="primary"
-                              class="w-full"
-                              onClick={viewShare}
-                              disabled={state.unshare}
-                            >
-                              View
-                            </Button>
-                          </div>
-                        </div>
-                      </Show>
-                    </div>
-                  </Popover>
-                  <Show when={shareUrl()}>
-                    <Tooltip value={state.copied ? "Copied" : "Copy link"} placement="top" gutter={8}>
-                      <IconButton
-                        icon={state.copied ? "check" : "copy"}
-                        variant="secondary"
-                        class="rounded-l-none border-l border-border-weak-base"
-                        onClick={copyLink}
-                        disabled={state.unshare}
-                      />
-                    </Tooltip>
-                  </Show>
-                </div>
-              </Show>
             </div>
           </Portal>
         )}

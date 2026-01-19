@@ -2,7 +2,7 @@
 
 **Last Updated:** 2026-01-15
 
-This guide covers setting up the OpenWork development environment from scratch.
+This guide covers setting up the OpenCo development environment from scratch.
 
 ## Table of Contents
 
@@ -76,8 +76,8 @@ curl -fsSL https://bun.sh/install | bash
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/anomalyco/opencode.git openwork
-cd openwork
+git clone https://github.com/anomalyco/opencode.git openco
+cd openco
 
 # Initialize submodules (for tauri-plugin-mcp)
 git submodule update --init --recursive

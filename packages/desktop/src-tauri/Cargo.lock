@@ -3115,7 +3115,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "openwork-desktop"
+name = "openco-desktop"
 version = "0.0.0"
 dependencies = [
  "futures",

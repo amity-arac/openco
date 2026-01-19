@@ -90,11 +90,13 @@ export function FilePreviewPanel() {
         setLoading(true)
 
         try {
-          // Force reload the file content from server
-          await local.file.load(path)
-
-          // Get updated node from local file system
+          // Get node from local file system (this handles initialization and loading)
           const node = await local.file.node(path)
+
+          // If node was loaded but we want fresh content, reload it
+          if (node?.loaded) {
+            await local.file.load(path)
+          }
 
           // === DEBUG LOGGING START ===
           console.log("[FilePreviewPanel] File node result:", node ? "Found" : "NOT FOUND")
@@ -219,8 +221,15 @@ export function FilePreviewPanel() {
               icon="close"
               size="normal"
               variant="ghost"
-              onClick={() => layout.filePreview.close()}
-              aria-label="Close preview"
+              onClick={() => {
+                // In fullscreen mode, exit fullscreen first instead of closing the panel
+                if (layout.filePreview.fullscreen()) {
+                  layout.filePreview.exitFullscreen()
+                } else {
+                  layout.filePreview.close()
+                }
+              }}
+              aria-label={layout.filePreview.fullscreen() ? "Exit fullscreen" : "Close preview"}
             />
           </div>
         </div>

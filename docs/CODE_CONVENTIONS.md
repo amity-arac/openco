@@ -2,7 +2,7 @@
 
 **Last Updated:** 2026-01-15
 
-This document outlines the code conventions and patterns used throughout the OpenWork codebase.
+This document outlines the code conventions and patterns used throughout the OpenCo codebase.
 
 ## Table of Contents
 

@@ -205,7 +205,20 @@ export const { use: useFileActivity, provider: FileActivityProvider } = createSi
       if (part.state.status === "pending") return undefined
       const input = part.state.input
       // Try common path field names (both camelCase and snake_case)
-      return (input?.filePath as string) ?? (input?.file_path as string) ?? (input?.path as string) ?? undefined
+      const rawPath = (input?.filePath as string) ?? (input?.file_path as string) ?? (input?.path as string) ?? undefined
+      if (!rawPath) return undefined
+
+      // Normalize the path - ensure it starts with "/" if it looks like an absolute path
+      // Some tools may provide paths without the leading slash (e.g., "Users/..." instead of "/Users/...")
+      if (!rawPath.startsWith("/") && rawPath.includes("/") && !rawPath.startsWith("./") && !rawPath.startsWith("../")) {
+        // Check if it looks like an absolute path pattern (e.g., "Users/", "home/", "var/")
+        const firstSegment = rawPath.split("/")[0]
+        const absolutePathIndicators = ["Users", "home", "var", "tmp", "opt", "etc", "usr"]
+        if (absolutePathIndicators.includes(firstSegment)) {
+          return "/" + rawPath
+        }
+      }
+      return rawPath
     }
 
     // T007: Subscribe to message.part.updated events
@@ -348,6 +361,24 @@ export const { use: useFileActivity, provider: FileActivityProvider } = createSi
       // T037: Remove activity for a specific file (e.g., when file is deleted)
       remove(path: string) {
         currentSession().setStore("files", path, undefined!)
+      },
+
+      // Validate activity files against a set of known existing paths
+      // Removes activity entries for files that no longer exist
+      validateFiles(existingPaths: Set<string>, getRelativePath: (path: string) => string) {
+        const session = currentSession()
+        const activityPaths = Object.keys(session.store.files)
+
+        for (const activityPath of activityPaths) {
+          // Check both the activity path and its relative version
+          const relativePath = getRelativePath(activityPath)
+
+          // If neither the absolute nor relative path exists in known paths, remove the activity
+          if (!existingPaths.has(activityPath) && !existingPaths.has(relativePath)) {
+            console.log("[FileActivity] Removing stale activity for:", activityPath)
+            session.setStore("files", activityPath, undefined!)
+          }
+        }
       },
 
       // T038: Rename activity from one path to another (e.g., when file is moved)

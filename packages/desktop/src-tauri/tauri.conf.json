@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "OpenWork Dev",
-  "identifier": "ai.openwork.desktop.dev",
-  "mainBinaryName": "OpenWork",
+  "productName": "OpenCo Dev",
+  "identifier": "arac.openco.desktop.dev",
+  "mainBinaryName": "OpenCo",
   "version": "../package.json",
   "build": {
     "beforeDevCommand": "bun run dev",
@@ -18,7 +18,7 @@
         "title": "OpenCode",
         "url": "/",
         "decorations": true,
-        "dragDropEnabled": false,
+        "dragDropEnabled": true,
         "zoomHotkeysEnabled": true,
         "titleBarStyle": "Overlay",
         "hiddenTitle": true,

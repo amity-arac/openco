@@ -9,7 +9,7 @@
   document.documentElement.dataset.theme = themeId
   document.documentElement.dataset.colorScheme = mode
 
-  if (themeId === "openwork") return
+  if (themeId === "openco") return
 
   var css = localStorage.getItem("opencode-theme-css-" + themeId + "-" + mode)
   if (css) {

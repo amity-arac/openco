@@ -2,7 +2,7 @@
 
 **Last Updated:** 2026-01-15
 
-Quick reference for key terms and concepts used in the OpenWork codebase.
+Quick reference for key terms and concepts used in the OpenCo codebase.
 
 ---
 
@@ -19,7 +19,7 @@ Tauri's main application handle, providing access to windows, state, and system 
 ## B
 
 ### Bun
-JavaScript runtime and package manager used by OpenWork. Version 1.3.5+.
+JavaScript runtime and package manager used by OpenCo. Version 1.3.5+.
 
 ### Bus/BusEvent
 Internal event system for publishing and subscribing to typed events across the application.
@@ -89,7 +89,7 @@ A server implementing MCP that provides tools/resources to AI agents. Can be std
 Specification format for REST APIs. The SDK is auto-generated from `openapi.json`.
 
 ### OpenCode
-The underlying AI coding assistant that OpenWork is built upon.
+The underlying AI coding assistant that OpenCo is built upon.
 
 ---
 
@@ -99,7 +99,7 @@ The underlying AI coding assistant that OpenWork is built upon.
 Utility for saving state to storage (global, workspace, or session-scoped).
 
 ### Plugin
-Async function that returns hooks for extending OpenWork functionality.
+Async function that returns hooks for extending OpenCo functionality.
 
 ### Provider
 AI model integration (e.g., Anthropic, OpenAI, Google). Supports 18+ providers.

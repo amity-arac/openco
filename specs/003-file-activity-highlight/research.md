@@ -118,7 +118,7 @@ const [activityStore, setActivityStore] = createStore<{
 - Existing `session-lsp-indicator.tsx` demonstrates the indicator pattern
 - Badges can use existing Tailwind utility classes
 
-**Color Mapping** (from `packages/ui/src/theme/themes/openwork.json`):
+**Color Mapping** (from `packages/ui/src/theme/themes/openco.json`):
 | Activity Type | Background Color | Icon Color | Tag Text |
 |---------------|-----------------|------------|----------|
 | Read | `surface-diff-add-base` (#dafbe0) | `icon-success-base` (#34c759) | "read" |
@@ -265,7 +265,7 @@ No new external dependencies required. Implementation uses:
 - `solid-js/store` - already included
 - `@solid-primitives/event-bus` - already included for event handling
 - Tailwind CSS - already included for styling
-- Theme tokens from `openwork.json` - already defined
+- Theme tokens from `openco.json` - already defined
 
 ---
 

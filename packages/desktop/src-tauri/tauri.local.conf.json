@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "OpenWork Local",
-  "identifier": "ai.openwork.desktop",
-  "mainBinaryName": "OpenWork",
+  "productName": "OpenCo Local",
+  "identifier": "arac.openco.desktop.local",
+  "mainBinaryName": "OpenCo",
   "version": "../package.json",
   "build": {
     "beforeDevCommand": "bun run dev",

@@ -1,4 +1,4 @@
-# OpenWork Architecture Documentation
+# OpenCo Architecture Documentation
 
 > Comprehensive developer guide to understanding the codebase architecture, conventions, and patterns.
 
@@ -21,7 +21,7 @@
 
 ## Overview
 
-**OpenWork** is an enhanced fork of OpenCode, designed for workspace and file collaboration among knowledge workers. It extends OpenCode's AI-powered agent capabilities to support collaborative workflows across various file types and workspace environments.
+**OpenCo** is an enhanced fork of OpenCode, designed for workspace and file collaboration among knowledge workers. It extends OpenCode's AI-powered agent capabilities to support collaborative workflows across various file types and workspace environments.
 
 ### Key Characteristics
 
@@ -35,7 +35,7 @@
 ## Project Structure
 
 ```
-openwork/
+openco/
 ├── packages/                    # Main packages
 │   ├── app/                     # Core web UI (shared across platforms)
 │   ├── desktop/                 # Tauri desktop wrapper
@@ -177,7 +177,7 @@ desktop/
 
 ### Context-Based Architecture
 
-OpenWork uses Solid.js contexts for state management (no Redux/Zustand).
+OpenCo uses Solid.js contexts for state management (no Redux/Zustand).
 
 #### `createSimpleContext` Helper
 
@@ -412,7 +412,7 @@ theme.setTheme("tokyonight")  // Switch theme
 theme.setColorScheme("dark")   // Light/dark/system
 ```
 
-Available themes: openwork, tokyonight, dracula, github, etc.
+Available themes: openco, tokyonight, dracula, github, etc.
 
 ---
 

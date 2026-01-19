@@ -33,6 +33,7 @@ export function TooltipKeybind(props: TooltipKeybindProps) {
 export function Tooltip(props: TooltipProps) {
   const [open, setOpen] = createSignal(false)
   // Include forceMount in local to strip it out - we never want forceMount on tooltips
+  // Also extract 'value' so it doesn't get spread to KobalteTooltip (which doesn't accept it)
   const [local, others] = splitProps(props, ["children", "class", "contentClass", "contentStyle", "inactive", "forceMount"])
 
   const c = children(() => local.children)
@@ -40,7 +41,7 @@ export function Tooltip(props: TooltipProps) {
   // Treat empty/falsy values as inactive to prevent ghost tooltips
   const isInactive = () => {
     if (local.inactive) return true
-    const value = others.value
+    const value = props.value
     // Check for falsy values (null, undefined, empty string, false)
     if (!value) return true
     // Check for empty string specifically
@@ -79,7 +80,7 @@ export function Tooltip(props: TooltipProps) {
                 class={local.contentClass}
                 style={local.contentStyle}
               >
-                {others.value}
+                {props.value}
               </KobalteTooltip.Content>
             </KobalteTooltip.Portal>
           </Show>

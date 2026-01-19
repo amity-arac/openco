@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo.png" alt="OpenWork logo" width="300">
+  <img src="logo.png" alt="OpenCo logo" width="300">
 </p>
 <p align="center">AI-powered workspace collaboration for knowledge workers.</p>
 <p align="center">
@@ -10,9 +10,9 @@
 
 ---
 
-## About OpenWork
+## About OpenCo
 
-**OpenWork** is an enhanced fork of [OpenCode](https://github.com/anomalyco/opencode), specifically designed for workspace and file collaboration among knowledge workers. While OpenCode focuses on AI-powered coding assistance, OpenWork extends these capabilities to support collaborative workflows across various file types and workspace environments.
+**OpenCo** is an enhanced fork of [OpenCode](https://github.com/anomalyco/opencode), specifically designed for workspace and file collaboration among knowledge workers. While OpenCode focuses on AI-powered coding assistance, OpenCo extends these capabilities to support collaborative workflows across various file types and workspace environments.
 
 ### Key Features
 
@@ -24,18 +24,18 @@
 
 ### Desktop App
 
-OpenWork is available as a desktop application for seamless integration with your local workspace.
+OpenCo is available as a desktop application for seamless integration with your local workspace.
 
 | Platform              | Download                               |
 | --------------------- | -------------------------------------- |
-| macOS (Apple Silicon) | `openwork-desktop-darwin-aarch64.dmg`  |
-| macOS (Intel)         | `openwork-desktop-darwin-x64.dmg`      |
-| Windows               | `openwork-desktop-windows-x64.exe`     |
+| macOS (Apple Silicon) | `openco-desktop-darwin-aarch64.dmg`  |
+| macOS (Intel)         | `openco-desktop-darwin-x64.dmg`      |
+| Windows               | `openco-desktop-windows-x64.exe`     |
 | Linux                 | `.deb`, `.rpm`, or AppImage            |
 
 ### Built on OpenCode
 
-OpenWork inherits all the powerful features from OpenCode:
+OpenCo inherits all the powerful features from OpenCode:
 
 - **AI Agents** - Multiple specialized agents for different tasks
 - **Client/Server Architecture** - Run on your computer, access remotely
@@ -43,9 +43,9 @@ OpenWork inherits all the powerful features from OpenCode:
 - **LSP Support** - Built-in Language Server Protocol support
 - **Terminal & GUI** - Choose your preferred interface
 
-### How OpenWork Differs from OpenCode
+### How OpenCo Differs from OpenCode
 
-While OpenCode is optimized for developers and coding workflows, OpenWork is designed for:
+While OpenCode is optimized for developers and coding workflows, OpenCo is designed for:
 
 - **Knowledge Workers** - Writers, analysts, researchers, and collaborative teams
 - **Document Collaboration** - Markdown, PDFs, spreadsheets, and presentations
@@ -54,11 +54,11 @@ While OpenCode is optimized for developers and coding workflows, OpenWork is des
 
 ### Getting Started
 
-OpenWork maintains compatibility with OpenCode's architecture while adding collaboration-focused features. See the [OpenCode documentation](https://opencode.ai/docs) for core functionality, with OpenWork-specific features documented in the `/specs` directory.
+OpenCo maintains compatibility with OpenCode's architecture while adding collaboration-focused features. See the [OpenCode documentation](https://opencode.ai/docs) for core functionality, with OpenCo-specific features documented in the `/specs` directory.
 
 ### Contributing
 
-If you're interested in contributing to OpenWork, please read our [contributing docs](./CONTRIBUTING.md) before submitting a pull request.
+If you're interested in contributing to OpenCo, please read our [contributing docs](./CONTRIBUTING.md) before submitting a pull request.
 
 ---
 

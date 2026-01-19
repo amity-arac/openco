@@ -65,24 +65,69 @@ export interface ScheduledJobsStore {
 // Helper: Parse cron expression to human-readable format
 // =============================================================================
 
+const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+const DAY_NAMES_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+
+function formatTime(hour: string, minute: string): string {
+  const h = parseInt(hour, 10)
+  const m = minute.padStart(2, "0")
+  if (h === 0) return `12:${m} AM`
+  if (h < 12) return `${h}:${m} AM`
+  if (h === 12) return `12:${m} PM`
+  return `${h - 12}:${m} PM`
+}
+
 export function cronToHuman(cron: string): string {
   const parts = cron.split(" ")
   if (parts.length !== 5) return cron
 
   const [minute, hour, dayOfMonth, month, dayOfWeek] = parts
 
-  // Common patterns
-  if (minute === "0" && hour !== "*" && dayOfMonth === "*" && month === "*" && dayOfWeek === "*") {
-    return `Daily at ${hour}:00`
+  // Every minute
+  if (minute === "*" && hour === "*" && dayOfMonth === "*" && month === "*" && dayOfWeek === "*") {
+    return "Every minute"
   }
+
+  // Every N minutes
+  if (minute.startsWith("*/") && hour === "*" && dayOfMonth === "*" && month === "*" && dayOfWeek === "*") {
+    const interval = minute.slice(2)
+    return `Every ${interval} minutes`
+  }
+
+  // Hourly at specific minute
+  if (minute !== "*" && hour === "*" && dayOfMonth === "*" && month === "*" && dayOfWeek === "*") {
+    return `Hourly at :${minute.padStart(2, "0")}`
+  }
+
+  // Daily at specific time
   if (minute !== "*" && hour !== "*" && dayOfMonth === "*" && month === "*" && dayOfWeek === "*") {
-    return `Daily at ${hour}:${minute.padStart(2, "0")}`
+    return `Daily at ${formatTime(hour, minute)}`
   }
-  if (dayOfWeek === "1" && dayOfMonth === "*" && month === "*") {
-    return `Weekly on Monday at ${hour}:${minute.padStart(2, "0")}`
+
+  // Weekly on specific day(s)
+  if (minute !== "*" && hour !== "*" && dayOfMonth === "*" && month === "*" && dayOfWeek !== "*") {
+    const time = formatTime(hour, minute)
+    // Handle multiple days (e.g., "1,3,5" = Mon, Wed, Fri)
+    if (dayOfWeek.includes(",")) {
+      const days = dayOfWeek.split(",").map(d => DAY_NAMES_SHORT[parseInt(d, 10)] || d)
+      return `${days.join(", ")} at ${time}`
+    }
+    // Handle range (e.g., "1-5" = Mon-Fri)
+    if (dayOfWeek.includes("-")) {
+      const [start, end] = dayOfWeek.split("-")
+      return `${DAY_NAMES_SHORT[parseInt(start, 10)]}-${DAY_NAMES_SHORT[parseInt(end, 10)]} at ${time}`
+    }
+    // Single day
+    const dayName = DAY_NAMES[parseInt(dayOfWeek, 10)] || dayOfWeek
+    return `${dayName}s at ${time}`
   }
-  if (dayOfMonth === "1" && month === "*" && dayOfWeek === "*") {
-    return `Monthly on the 1st at ${hour}:${minute.padStart(2, "0")}`
+
+  // Monthly on specific day
+  if (minute !== "*" && hour !== "*" && dayOfMonth !== "*" && month === "*" && dayOfWeek === "*") {
+    const time = formatTime(hour, minute)
+    const day = parseInt(dayOfMonth, 10)
+    const suffix = day === 1 ? "st" : day === 2 ? "nd" : day === 3 ? "rd" : "th"
+    return `Monthly on the ${day}${suffix} at ${time}`
   }
 
   return cron
@@ -303,16 +348,39 @@ export const { use: useScheduledJobs, provider: ScheduledJobsProvider } = create
         return this.updateJob(id, { enabled: !job.enabled })
       },
 
-      // Run a job immediately
-      async runJob(id: string): Promise<boolean> {
+      // Run a job immediately using the scheduler plugin
+      async runJob(id: string): Promise<{
+        success: boolean
+        message?: string
+        startedAt?: string
+        logPath?: string
+        pid?: number
+        error?: string
+      }> {
         try {
           const response = await doFetch(`${globalSDK.url}/scheduler/jobs/${id}/run`, {
             method: "POST",
           })
-          return response.ok
+          if (response.ok) {
+            const data = await response.json() as {
+              success: boolean
+              message?: string
+              startedAt?: string
+              logPath?: string
+              pid?: number
+              error?: string
+            }
+            // Refresh jobs list to update lastRunAt
+            if (data.success) {
+              fetchJobs()
+            }
+            return data
+          }
+          const errorData = await response.json().catch(() => ({})) as { error?: string }
+          return { success: false, error: errorData.error || "Failed to run job" }
         } catch (err) {
           console.error("[ScheduledJobs] Failed to run job:", err)
-          return false
+          return { success: false, error: err instanceof Error ? err.message : "Failed to run job" }
         }
       },
 

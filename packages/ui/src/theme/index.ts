@@ -31,7 +31,7 @@ export { ThemeProvider, useTheme, type ColorScheme } from "./context"
 
 export {
   DEFAULT_THEMES,
-  openworkTheme,
+  opencoTheme,
   tokyonightTheme,
   draculaTheme,
   monokaiTheme,

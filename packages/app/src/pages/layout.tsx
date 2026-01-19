@@ -28,9 +28,13 @@ import { IconButton } from "@opencode-ai/ui/icon-button"
 import { InlineInput } from "@opencode-ai/ui/inline-input"
 import { Tooltip, TooltipKeybind } from "@opencode-ai/ui/tooltip"
 import { HoverCard } from "@opencode-ai/ui/hover-card"
+import { Popover } from "@opencode-ai/ui/popover"
+import { List } from "@opencode-ai/ui/list"
+import { ProviderIcon } from "@opencode-ai/ui/provider-icon"
+import { Tag } from "@opencode-ai/ui/tag"
+import type { IconName } from "@opencode-ai/ui/icons/provider"
 import { DropdownMenu } from "@opencode-ai/ui/dropdown-menu"
 import { Collapsible } from "@opencode-ai/ui/collapsible"
-import { DiffChanges } from "@opencode-ai/ui/diff-changes"
 import { Spinner } from "@opencode-ai/ui/spinner"
 import { getFilename } from "@opencode-ai/util/path"
 import { Session } from "@opencode-ai/sdk/v2/client"
@@ -45,7 +49,7 @@ import {
   createSortable,
 } from "@thisbeyond/solid-dnd"
 import type { DragEvent } from "@thisbeyond/solid-dnd"
-import { useProviders } from "@/hooks/use-providers"
+import { useProviders, popularProviders } from "@/hooks/use-providers"
 import { showToast, Toast, toaster } from "@opencode-ai/ui/toast"
 import { useGlobalSDK } from "@/context/global-sdk"
 import { useNotification } from "@/context/notification"
@@ -56,6 +60,7 @@ import { retry } from "@opencode-ai/util/retry"
 import { useDialog } from "@opencode-ai/ui/context/dialog"
 import { useTheme, type ColorScheme } from "@opencode-ai/ui/theme"
 import { DialogSelectProvider } from "@/components/dialog-select-provider"
+import { DialogConnectProvider } from "@/components/dialog-connect-provider"
 import { DialogSelectServer } from "@/components/dialog-select-server"
 import { useCommand, type CommandOption } from "@/context/command"
 import { ConstrainDragXAxis } from "@/utils/solid-dnd"
@@ -64,7 +69,8 @@ import { DialogSelectDirectory } from "@/components/dialog-select-directory"
 import { DialogEditProject } from "@/components/dialog-edit-project"
 import { Titlebar } from "@/components/titlebar"
 import { useServer } from "@/context/server"
-import { ScheduledJobsProvider } from "@/context/scheduled-jobs"
+import { ScheduledJobsProvider, useScheduledJobs } from "@/context/scheduled-jobs"
+import { ScheduledJobDialog } from "@/components/scheduled-job-dialog"
 
 export default function Layout(props: ParentProps) {
   const [store, setStore, , ready] = persisted(
@@ -1134,13 +1140,6 @@ export default function Layout(props: ParentProps) {
                 stopPropagation
               />
             </Tooltip>
-            <Show when={props.session.summary}>
-              {(summary) => (
-                <div class="group-hover/session:hidden group-active/session:hidden group-focus-within/session:hidden">
-                  <DiffChanges changes={summary()} />
-                </div>
-              )}
-            </Show>
           </div>
         </A>
         <div
@@ -1512,6 +1511,87 @@ export default function Layout(props: ParentProps) {
     )
   }
 
+  const ScheduledJobsSidebar = (_props: { mobile?: boolean }): JSX.Element => {
+    const scheduledJobs = useScheduledJobs()
+    const [showCreateDialog, setShowCreateDialog] = createSignal(false)
+
+    return (
+      <>
+        <div class="shrink-0 px-2 py-1">
+          <div class="flex items-start justify-between gap-2 p-2 pr-1">
+            <div class="flex flex-col min-w-0">
+              <span class="text-16-medium text-text-strong truncate">Scheduled Jobs</span>
+              <span class="text-12-regular text-text-muted truncate">Global scheduled tasks</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="py-4 px-3">
+          <Button size="large" icon="plus-small" class="w-full" onClick={() => setShowCreateDialog(true)}>
+            New job
+          </Button>
+        </div>
+
+        <div class="flex-1 min-h-0 overflow-y-auto no-scrollbar">
+          <Show when={scheduledJobs.loading()}>
+            <div class="flex items-center justify-center py-8">
+              <Spinner class="size-5" />
+            </div>
+          </Show>
+
+          <Show when={!scheduledJobs.loading() && scheduledJobs.jobs().length === 0}>
+            <div class="flex flex-col items-center justify-center px-4 py-8 text-center">
+              <div class="text-12-regular text-text-muted max-w-[200px]">
+                No scheduled jobs yet. Create one to run AI tasks automatically.
+              </div>
+            </div>
+          </Show>
+
+          <Show when={!scheduledJobs.loading() && scheduledJobs.jobs().length > 0}>
+            <nav class="flex flex-col gap-1 px-2">
+              <For each={scheduledJobs.jobs()}>
+                {(job) => (
+                  <button
+                    type="button"
+                    class="group/job relative w-full rounded-md cursor-default transition-colors px-2 py-1.5 text-left
+                           hover:bg-surface-raised-base-hover"
+                    classList={{
+                      "bg-surface-base-active": scheduledJobs.selectedJobId() === job.id,
+                    }}
+                    onClick={() => scheduledJobs.selectJob(job.id)}
+                  >
+                    <div class="flex items-center gap-2">
+                      <div
+                        class="w-1.5 h-1.5 rounded-full shrink-0"
+                        classList={{
+                          "bg-green-500": job.enabled,
+                          "bg-gray-400": !job.enabled,
+                        }}
+                      />
+                      <span class="text-14-regular text-text-strong truncate flex-1">{job.name}</span>
+                    </div>
+                  </button>
+                )}
+              </For>
+            </nav>
+          </Show>
+        </div>
+
+        <ScheduledJobDialog
+          open={showCreateDialog()}
+          onClose={() => setShowCreateDialog(false)}
+          onSave={async (data) => {
+            const result = await scheduledJobs.createJob(data)
+            if (result) {
+              setShowCreateDialog(false)
+            }
+            return result !== null
+          }}
+        />
+      </>
+    )
+  }
+
   const SidebarContent = (sidebarProps: { mobile?: boolean }) => {
     const expanded = () => sidebarProps.mobile || layout.sidebar.opened()
 
@@ -1595,24 +1675,49 @@ export default function Layout(props: ParentProps) {
             </DragDropProvider>
           </div>
           <div class="shrink-0 w-full pt-3 pb-3 flex flex-col items-center gap-2">
-            <Tooltip placement={sidebarProps.mobile ? "bottom" : "right"} value="Scheduled Jobs">
-              <button
-                type="button"
-                classList={{
-                  "flex items-center justify-center size-10 p-1 rounded-lg overflow-hidden transition-colors cursor-default": true,
-                  "bg-transparent border-2 border-icon-strong-base hover:bg-surface-base-hover": isScheduledJobsRoute(),
-                  "bg-transparent border border-transparent hover:bg-surface-base-hover hover:border-border-weak-base": !isScheduledJobsRoute(),
+            <Popover
+              placement="right-end"
+              gutter={8}
+              trigger={
+                <IconButton icon="settings-gear" variant="ghost" size="large" aria-label="Settings" />
+              }
+              title="Connect provider"
+              class="!min-w-[320px] !max-w-[400px]"
+            >
+              <List
+                search={{ placeholder: "Search providers", autofocus: true }}
+                activeIcon="plus-small"
+                key={(x) => x?.id}
+                items={providers.all}
+                filterKeys={["id", "name"]}
+                groupBy={(x) => (popularProviders.includes(x.id) ? "Popular" : "Other")}
+                sortBy={(a, b) => {
+                  if (popularProviders.includes(a.id) && popularProviders.includes(b.id))
+                    return popularProviders.indexOf(a.id) - popularProviders.indexOf(b.id)
+                  return a.name.localeCompare(b.name)
                 }}
-                onClick={() => navigate("/scheduled-jobs")}
-                aria-label="Scheduled jobs"
+                sortGroupsBy={(a, b) => {
+                  if (a.category === "Popular" && b.category !== "Popular") return -1
+                  if (b.category === "Popular" && a.category !== "Popular") return 1
+                  return 0
+                }}
+                onSelect={(x) => {
+                  if (!x) return
+                  dialog.show(() => <DialogConnectProvider provider={x.id} />)
+                }}
               >
-                <Icon name="checklist" size="large" />
-              </button>
-            </Tooltip>
-            <Tooltip placement={sidebarProps.mobile ? "bottom" : "right"} value="Settings">
-              <IconButton disabled icon="settings-gear" variant="ghost" size="large" />
-            </Tooltip>
-            <Tooltip placement={sidebarProps.mobile ? "bottom" : "right"} value="Help">
+                {(i) => (
+                  <div class="px-1.25 w-full flex items-center gap-x-3">
+                    <ProviderIcon data-slot="list-item-extra-icon" id={i.id as IconName} />
+                    <span>{i.name}</span>
+                    <Show when={i.id === "opencode"}>
+                      <Tag>Recommended</Tag>
+                    </Show>
+                  </div>
+                )}
+              </List>
+            </Popover>
+            <Tooltip placement={sidebarProps.mobile ? "bottom" : "right"} value={<span>Help</span>}>
               <IconButton
                 icon="help"
                 variant="ghost"
@@ -1633,21 +1738,7 @@ export default function Layout(props: ParentProps) {
           >
             {/* Scheduled Jobs sidebar content */}
             <Show when={isScheduledJobsRoute()}>
-              <div class="shrink-0 px-2 py-1">
-                <div class="flex items-start justify-between gap-2 p-2 pr-1">
-                  <div class="flex flex-col min-w-0">
-                    <span class="text-16-medium text-text-strong truncate">Scheduled Jobs</span>
-                    <span class="text-12-regular text-text-muted truncate">
-                      Global scheduled tasks
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div class="flex-1 min-h-0 flex flex-col items-center justify-center px-4 text-center">
-                <div class="text-12-regular text-text-muted max-w-[200px]">
-                  Manage scheduled AI tasks that run automatically across all projects.
-                </div>
-              </div>
+              <ScheduledJobsSidebar mobile={sidebarProps.mobile} />
             </Show>
             {/* Project sidebar content */}
             <Show when={!isScheduledJobsRoute() && project()} keyed>

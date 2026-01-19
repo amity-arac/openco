@@ -13,7 +13,7 @@
 
 ## Path Conventions
 
-- Base: `/Users/touchaponk/Documents/GitHub/openwork/`
+- Base: `/Users/touchaponk/Documents/GitHub/openco/`
 - App source: `packages/app/src/`
 - UI components: `packages/ui/src/components/`
 - Tests: `packages/app/tests/`

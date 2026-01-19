@@ -2,7 +2,7 @@
 
 **Last Updated:** 2026-01-15
 
-This document covers how to create custom plugins for OpenWork.
+This document covers how to create custom plugins for OpenCo.
 
 ## Table of Contents
 
@@ -19,7 +19,7 @@ This document covers how to create custom plugins for OpenWork.
 
 ## Overview
 
-The OpenWork plugin system allows you to extend functionality through:
+The OpenCo plugin system allows you to extend functionality through:
 
 - **Custom Tools**: Add new capabilities the AI can use
 - **Authentication**: Implement OAuth flows for providers
@@ -439,7 +439,7 @@ export const OAuthPlugin: Plugin = async (ctx) => {
 
             return {
               url: authUrl.toString(),
-              instructions: "Click to authorize OpenWork",
+              instructions: "Click to authorize OpenCo",
               method: "auto",
               callback: async () => {
                 // Exchange code for token
@@ -555,7 +555,7 @@ export { MyPlugin } from "./my-plugin"
 
 ```json
 {
-  "name": "my-openwork-plugin",
+  "name": "my-openco-plugin",
   "version": "1.0.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -575,7 +575,7 @@ npm publish
 
 ```jsonc
 {
-  "plugin": ["my-openwork-plugin@1.0.0"]
+  "plugin": ["my-openco-plugin@1.0.0"]
 }
 ```
 
@@ -663,7 +663,7 @@ export const GitHubPlugin: Plugin = async (ctx) => {
 import type { Plugin } from "@opencode-ai/plugin"
 
 export const LoggingPlugin: Plugin = async (ctx) => {
-  const logFile = `${ctx.directory}/.openwork/activity.log`
+  const logFile = `${ctx.directory}/.openco/activity.log`
 
   return {
     tool: {

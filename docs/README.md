@@ -1,6 +1,6 @@
-# OpenWork Developer Documentation
+# OpenCo Developer Documentation
 
-Welcome to the OpenWork developer documentation. This directory contains comprehensive guides for understanding and contributing to the codebase.
+Welcome to the OpenCo developer documentation. This directory contains comprehensive guides for understanding and contributing to the codebase.
 
 ## Quick Links
 

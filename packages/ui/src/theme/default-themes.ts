@@ -1,5 +1,5 @@
 import type { DesktopTheme } from "./types"
-import openworkThemeJson from "./themes/openwork.json"
+import opencoThemeJson from "./themes/openco.json"
 import tokyoThemeJson from "./themes/tokyonight.json"
 import draculaThemeJson from "./themes/dracula.json"
 import monokaiThemeJson from "./themes/monokai.json"
@@ -13,7 +13,7 @@ import nightowlThemeJson from "./themes/nightowl.json"
 import vesperThemeJson from "./themes/vesper.json"
 import carbonfoxThemeJson from "./themes/carbonfox.json"
 
-export const openworkTheme = openworkThemeJson as DesktopTheme
+export const opencoTheme = opencoThemeJson as DesktopTheme
 export const tokyonightTheme = tokyoThemeJson as DesktopTheme
 export const draculaTheme = draculaThemeJson as DesktopTheme
 export const monokaiTheme = monokaiThemeJson as DesktopTheme
@@ -28,7 +28,7 @@ export const vesperTheme = vesperThemeJson as DesktopTheme
 export const carbonfoxTheme = carbonfoxThemeJson as DesktopTheme
 
 export const DEFAULT_THEMES: Record<string, DesktopTheme> = {
-  openwork: openworkTheme,
+  openco: opencoTheme,
   tokyonight: tokyonightTheme,
   dracula: draculaTheme,
   monokai: monokaiTheme,

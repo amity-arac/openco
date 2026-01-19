@@ -1,5 +1,5 @@
 [package]
-name = "openwork-desktop"
+name = "openco-desktop"
 version = "0.0.0"
 description = "The open source AI coworker agent"
 authors = ["Arac"]

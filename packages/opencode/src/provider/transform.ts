@@ -43,26 +43,26 @@ export namespace ProviderTransform {
     model: Provider.Model,
     options: Record<string, unknown>,
   ): ModelMessage[] {
-    // Anthropic rejects messages with empty content - filter out empty string messages
-    // and remove empty text/reasoning parts from array content
+    // Anthropic rejects messages with empty or whitespace-only content - filter out such messages
+    // and remove empty/whitespace text/reasoning parts from array content
     if (model.api.npm === "@ai-sdk/anthropic") {
       msgs = msgs
         .map((msg) => {
           if (typeof msg.content === "string") {
-            if (msg.content === "") return undefined
+            if (msg.content.trim() === "") return undefined
             return msg
           }
           if (!Array.isArray(msg.content)) return msg
           const filtered = msg.content.filter((part) => {
             if (part.type === "text" || part.type === "reasoning") {
-              return part.text !== ""
+              return part.text.trim() !== ""
             }
             return true
           })
           if (filtered.length === 0) return undefined
           return { ...msg, content: filtered }
         })
-        .filter((msg): msg is ModelMessage => msg !== undefined && msg.content !== "")
+        .filter((msg): msg is ModelMessage => msg !== undefined && (typeof msg.content !== "string" || msg.content.trim() !== ""))
     }
 
     if (model.api.id.includes("claude")) {

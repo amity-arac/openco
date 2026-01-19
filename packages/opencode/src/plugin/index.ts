@@ -19,6 +19,7 @@ export namespace Plugin {
     "opencode-anthropic-auth@0.0.9",
     "@gitlab/opencode-gitlab-auth@1.3.0",
     "opencode-scheduler@1.1.0",
+    "opencode-gemini-auth@latest"
   ]
 
   // Built-in plugins that are directly imported (not installed from npm)

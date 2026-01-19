@@ -420,6 +420,25 @@ export default function Page() {
     ),
   )
 
+  // Add file to prompt context when preview panel is opened, remove previous file when switching
+  createEffect(
+    on(
+      () => layout.filePreview.filePath(),
+      (filePath, prevFilePath) => {
+        // Remove the previous file from context when switching files
+        if (prevFilePath) {
+          const prevKey = `file:${prevFilePath}:undefined:undefined`
+          prompt.context.remove(prevKey)
+        }
+        // Add the new file to context
+        if (filePath) {
+          prompt.context.add({ type: "file", path: filePath })
+        }
+      },
+      { defer: true },
+    ),
+  )
+
   // Listen for file-chip-click events from Markdown component (fallback when context isn't available)
   createEffect(() => {
     const handleFileChipClick = (e: Event) => {
@@ -813,7 +832,7 @@ export default function Page() {
   const mobileReview = createMemo(() => !isDesktop() && hasReview() && store.mobileTab === "review")
 
   const showTabs = createMemo(
-    () => view().reviewPanel.opened() && (hasReview() || tabs().all().length > 0 || contextOpen()),
+    () => view().reviewPanel.opened() && (tabs().all().length > 0 || contextOpen()),
   )
 
   const activeTab = createMemo(() => {
